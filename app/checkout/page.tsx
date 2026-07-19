@@ -23,7 +23,22 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("razorpay");
+  const [gateways, setGateways] = useState<any[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState("");
+
+  useEffect(() => {
+    // Fetch available payment gateways
+    fetch("/api/checkout/gateways")
+      .then(res => res.json())
+      .then(data => {
+        if (data.gateways && data.gateways.length > 0) {
+          setGateways(data.gateways);
+          setPaymentMethod(data.gateways[0].id);
+        }
+      })
+      .catch(err => console.error("Failed to load gateways", err));
+  }, []);
+
   const [couponCode, setCouponCode] = useState("");
   // Let WooCommerce handle shipping and discount natively on the backend!
   // We no longer calculate them on the frontend.
@@ -136,7 +151,9 @@ export default function CheckoutPage() {
       const wcOrder = orderData.order;
 
       // 2. Handle Payment
-      if (paymentMethod === "cod") {
+      // If it's COD, BACS, Cheque, or any offline method, we just complete the order.
+      // If it's Razorpay, we initialize the Razorpay flow.
+      if (paymentMethod !== "razorpay") {
         toast.success("Order placed successfully!");
         clearCart();
         router.push(`/account/orders/${wcOrder.id}`);
@@ -293,34 +310,31 @@ export default function CheckoutPage() {
               <h2 className="text-lg font-semibold text-foreground mb-4">Payment Method</h2>
               <div className="bg-white rounded-lg border border-border p-4">
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-3 space-y-0">
-                    <input 
-                      type="radio" 
-                      id="razorpay" 
-                      name="paymentMethod" 
-                      value="razorpay"
-                      checked={paymentMethod === "razorpay"}
-                      onChange={() => setPaymentMethod("razorpay")}
-                      className="h-4 w-4 text-gold border-border focus:ring-gold"
-                    />
-                    <label htmlFor="razorpay" className="text-sm font-medium leading-none cursor-pointer">
-                      Credit Card / UPI / NetBanking
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-3 space-y-0">
-                    <input 
-                      type="radio" 
-                      id="cod" 
-                      name="paymentMethod" 
-                      value="cod"
-                      checked={paymentMethod === "cod"}
-                      onChange={() => setPaymentMethod("cod")}
-                      className="h-4 w-4 text-gold border-border focus:ring-gold"
-                    />
-                    <label htmlFor="cod" className="text-sm font-medium leading-none cursor-pointer">
-                      Cash on Delivery
-                    </label>
-                  </div>
+                  {gateways.length === 0 ? (
+                    <div className="text-sm text-muted-foreground py-2">Loading payment methods...</div>
+                  ) : (
+                    gateways.map((gateway) => (
+                      <div key={gateway.id} className="flex items-center space-x-3 space-y-0">
+                        <input 
+                          type="radio" 
+                          id={gateway.id}
+                          name="paymentMethod" 
+                          value={gateway.id}
+                          checked={paymentMethod === gateway.id}
+                          onChange={() => setPaymentMethod(gateway.id)}
+                          className="h-4 w-4 text-gold border-border focus:ring-gold"
+                        />
+                        <label htmlFor={gateway.id} className="text-sm font-medium leading-none cursor-pointer">
+                          {gateway.title}
+                          {gateway.description && (
+                            <p className="text-xs text-muted-foreground mt-1 font-normal leading-relaxed max-w-[90%]">
+                              {gateway.description}
+                            </p>
+                          )}
+                        </label>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">

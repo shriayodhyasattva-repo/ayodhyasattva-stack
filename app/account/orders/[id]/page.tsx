@@ -11,6 +11,7 @@ export default function OrderDetailsPage() {
   const params = useParams();
   const orderId = params.id as string;
   const [order, setOrder] = useState<WCOrder | null>(null);
+  const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,6 +21,7 @@ export default function OrderDetailsPage() {
         if (res.ok) {
           const data = await res.json();
           setOrder(data.order);
+          setNotes(data.notes || []);
         }
       } catch (error) {
         console.error("Failed to fetch order details", error);
@@ -132,6 +134,39 @@ export default function OrderDetailsPage() {
               </div>
             </div>
           </div>
+          
+          {notes.length > 0 && (
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <h3 className="text-sm font-bold flex items-center gap-2">
+                <Clock className="h-4 w-4 text-gold" />
+                Order Updates
+              </h3>
+              <div className="border border-border rounded-lg bg-background overflow-hidden relative">
+                {/* Timeline vertical line */}
+                <div className="absolute left-[39px] top-4 bottom-4 w-px bg-border/80"></div>
+                
+                <div className="divide-y divide-border/50 relative z-10">
+                  {notes.map((note, idx) => (
+                    <div key={note.id} className="p-4 pl-[72px] relative group hover:bg-muted/5 transition-colors">
+                      {/* Timeline dot */}
+                      <div className={`absolute left-8 top-5 h-3.5 w-3.5 rounded-full border-2 border-background ring-1 ring-border ${idx === 0 ? 'bg-gold ring-gold/50' : 'bg-muted-foreground/30'}`}></div>
+                      
+                      <div className="text-xs text-muted-foreground font-medium mb-1.5 flex items-center justify-between">
+                        {new Date(note.date_created).toLocaleString()}
+                        {idx === 0 && <span className="text-[9px] uppercase tracking-wider bg-gold/10 text-gold px-1.5 py-0.5 rounded font-bold">Latest</span>}
+                      </div>
+                      
+                      {/* Render note HTML content safely */}
+                      <div 
+                        className="text-sm text-foreground leading-relaxed prose prose-sm prose-p:my-1 max-w-none"
+                        dangerouslySetInnerHTML={{ __html: note.note }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

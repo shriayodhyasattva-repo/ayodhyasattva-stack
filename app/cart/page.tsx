@@ -5,9 +5,23 @@ import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Truck, Image as ImageIcon } from "lucide-react";
+import ProductCard from "@/components/product/product-card";
+import { Product } from "@/types/product";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeItem, cartTotal, cartCount, clearCart, isInitialized } = useCart();
+  const [crossSells, setCrossSells] = React.useState<Product[]>([]);
+
+  React.useEffect(() => {
+    if (isInitialized && cartCount > 0) {
+      fetch("/api/cart/cross-sells")
+        .then(res => res.json())
+        .then(data => {
+          if (data.products) setCrossSells(data.products);
+        })
+        .catch(err => console.error("Failed to load cross sells", err));
+    }
+  }, [isInitialized, cartCount]);
 
   if (!isInitialized) {
     return (
@@ -183,6 +197,20 @@ export default function CartPage() {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* Cross Sells Section */}
+        {crossSells.length > 0 && cartCount > 0 && (
+          <div className="mt-20 border-t border-border pt-16">
+            <h2 className="text-2xl font-serif font-bold text-foreground mb-8">
+              You May Also Like
+            </h2>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 sm:gap-x-6 lg:gap-x-8">
+              {crossSells.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
         )}
 

@@ -65,6 +65,11 @@ export const storeApi = axios.create({
   baseURL: `${WOOCOMMERCE_URL}/wp-json/wc/store/v1`,
 });
 
+// Standard WordPress REST API (for Comments/Replies, Posts, etc)
+export const wpApi = axios.create({
+  baseURL: `${WOOCOMMERCE_URL}/wp-json/wp/v2`,
+});
+
 // Native Fetch wrapper for WooCommerce (Enables Next.js Data Cache & ISR)
 async function fetchWCCached(endpoint: string, queryParams: Record<string, any> = {}, tags: string[] = []) {
   const url = new URL(`${WOOCOMMERCE_URL}/wp-json/wc/v3${endpoint}`);
@@ -87,7 +92,7 @@ async function fetchWCCached(endpoint: string, queryParams: Record<string, any> 
       ...authHeader,
       'Content-Type': 'application/json'
     },
-    next: { tags },
+    next: { tags, revalidate: 60 },
   });
 
   if (!res.ok) {
@@ -185,6 +190,13 @@ export async function getOrder(orderId: number): Promise<WCOrder> {
   return response.data;
 }
 
+export async function getOrderNotes(orderId: number): Promise<any[]> {
+  const response = await api.get(`/orders/${orderId}/notes`, {
+    params: { type: "customer" }
+  });
+  return response.data;
+}
+
 export async function updateOrder(orderId: number, data: Partial<WCOrder>): Promise<WCOrder> {
     const response = await api.put(`/orders/${orderId}`, data);
   return response.data;
@@ -254,6 +266,20 @@ export async function getProductReviews(productId: number): Promise<WCReview[]> 
 export async function createProductReview(data: CreateReviewPayload): Promise<WCReview> {
     const response = await api.post("/products/reviews", data);
   return response.data;
+}
+
+export async function getProductReplies(productId: number): Promise<any[]> {
+  // WordPress comments endpoint gets all comments (including replies to reviews)
+  // We fetch those that belong to the product post.
+  try {
+    const response = await wpApi.get("/comments", {
+      params: { post: productId, status: "approve" }
+    });
+    return response.data;
+  } catch (e) {
+    console.error("Failed to fetch product replies:", e);
+    return [];
+  }
 }
 
 /* ─── Shipping & Payment ────────────────────────────────────────────────── */

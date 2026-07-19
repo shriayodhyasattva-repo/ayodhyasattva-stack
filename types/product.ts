@@ -61,6 +61,8 @@ export interface Product {
   default_attributes?: { id: number; name: string; option: string }[];
   variations?: number[];
   related_ids?: number[];
+  upsell_ids?: number[];
+  cross_sell_ids?: number[];
   average_rating: string;
   rating_count: number;
   weight?: string;

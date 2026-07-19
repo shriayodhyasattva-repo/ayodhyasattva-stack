@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrder } from "@/lib/woocommerce";
+import { getOrder, getOrderNotes } from "@/lib/woocommerce";
 import { getSession } from "@/lib/auth";
 
 interface RouteParams {
@@ -11,7 +11,10 @@ export async function GET(request: Request, { params }: RouteParams) {
     const session = await getSession();
     const { id } = await params;
     
-    const order = await getOrder(Number(id));
+    const [order, notes] = await Promise.all([
+      getOrder(Number(id)),
+      getOrderNotes(Number(id)).catch(() => []) // Catch in case notes fail, don't break order
+    ]);
 
     // Ensure the user owns this order, or allow guest orders if customer_id is 0
     // (In a real app, you might use an order key for guest access)
@@ -21,7 +24,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       }
     }
 
-    return NextResponse.json({ order });
+    return NextResponse.json({ order, notes });
   } catch (error: any) {
     console.error("Order API Error:", error);
     return NextResponse.json({ error: "Failed to fetch order" }, { status: 500 });

@@ -164,6 +164,30 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold border-b border-border/50 pb-2">Shipping Address</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold">Street Address</label>
+              <Input name="address_1" value={formData.shipping?.address_1 || ""} onChange={handleShippingChange} className="h-9 text-xs" />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="space-y-1.5 col-span-2">
+                <label className="text-xs font-semibold">City</label>
+                <Input name="city" value={formData.shipping?.city || ""} onChange={handleShippingChange} className="h-9 text-xs" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold">State</label>
+                <Input name="state" value={formData.shipping?.state || ""} onChange={handleShippingChange} className="h-9 text-xs" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold">PIN Code</label>
+                <Input name="postcode" value={formData.shipping?.postcode || ""} onChange={handleShippingChange} className="h-9 text-xs" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="pt-4 border-t border-border/50">
           <Button type="submit" disabled={saving}>
             {saving ? "Saving Changes..." : "Save Changes"}

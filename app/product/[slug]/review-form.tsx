@@ -31,19 +31,31 @@ export default function ReviewForm({ productId }: { productId: number }) {
     
     setLoading(true);
     try {
-      // In a real app, you would pass the slug to the API route, 
-      // but we have productId here. Let's create a generic POST route or adapt the existing one.
-      // Since our API route `app/api/products/[slug]/reviews` uses slug, 
-      // and we don't have it easily here without passing it down...
-      // Let's assume the component will just dispatch a fetch to a new endpoint or the slug-based one.
-      
-      // For simplicity in this demo, let's pretend we have a general `/api/reviews` endpoint,
-      // or we just mock the success state since WC mock fallback handles it.
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          rating,
+          review,
+          reviewer: user.displayName || `${user.firstName} ${user.lastName}`,
+          reviewerEmail: user.email,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit review");
+      }
+
       toast.success("Review submitted for approval!");
       setReview("");
       setRating(5);
-    } catch (error) {
-      toast.error("Failed to submit review");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to submit review");
     } finally {
       setLoading(false);
     }
