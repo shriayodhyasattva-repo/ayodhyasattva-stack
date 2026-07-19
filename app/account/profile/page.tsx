@@ -66,6 +66,18 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Frontend Validation
+    const { billing } = formData;
+    if (billing.address_1 || billing.city || billing.state || billing.postcode || billing.phone) {
+      if (!billing.address_1 || !billing.city || !billing.state || !billing.postcode || !billing.phone) {
+        toast.error("Incomplete Address", { 
+          description: "If you provide an address, please fill out all fields: Street, City, State, PIN, and Phone." 
+        });
+        return;
+      }
+    }
+
     setSaving(true);
     
     try {
@@ -75,7 +87,10 @@ export default function ProfilePage() {
         body: JSON.stringify(formData)
       });
       
-      if (!res.ok) throw new Error("Failed to update profile");
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to update profile");
+      }
       
       const data = await res.json();
       setCustomer(data.customer);

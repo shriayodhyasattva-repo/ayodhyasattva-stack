@@ -34,6 +34,11 @@ export async function PUT(request: Request) {
       shipping: body.shipping,
     };
 
+    // Sanitize WooCommerce strict fields
+    if (updateData.billing?.email === "") {
+      delete updateData.billing.email;
+    }
+
     const customer = await updateCustomer(session.id, updateData);
     
     // We should technically update the session JWT here if first/last name changed, 
@@ -41,7 +46,15 @@ export async function PUT(request: Request) {
     
     return NextResponse.json({ customer });
   } catch (error: any) {
-    console.error("Customer API Error:", error);
+    console.error("Customer API Error:", error.response?.data || error.message);
+    
+    if (error.response?.data?.code === "rest_invalid_param") {
+      return NextResponse.json(
+        { error: error.response.data.message, details: error.response.data.data },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json({ error: "Failed to update customer profile" }, { status: 500 });
   }
 }
