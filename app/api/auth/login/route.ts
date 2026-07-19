@@ -36,6 +36,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ user });
   } catch (error: any) {
     console.error("Login Error:", error.response?.data || error.message);
+    
+    if (error.response?.data?.code === 'rest_no_route') {
+      console.error("Server Configuration Error: The 'JWT Authentication for WP REST API' plugin is missing or misconfigured on the WordPress backend.");
+      return NextResponse.json(
+        { error: "Authentication service is currently unavailable. Please try again later." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Invalid username or password" },
       { status: 401 }

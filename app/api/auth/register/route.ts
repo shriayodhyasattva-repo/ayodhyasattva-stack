@@ -13,16 +13,35 @@ export async function POST(req: Request) {
     }
 
     // Create WooCommerce customer
-    const wcCustomer = await createCustomer({
-      email,
-      password,
-      first_name: firstName,
-      last_name: lastName,
-      username: email.split("@")[0], // Basic username generation
-    });
+    let wcCustomer;
+    try {
+      wcCustomer = await createCustomer({
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+        username: email.split("@")[0], // Basic username generation
+      });
+    } catch (err: any) {
+      console.error("createCustomer failed:", err.response?.data || err.message);
+      throw err;
+    }
 
     // Authenticate newly created customer
-    const authData = await authenticateCustomer(wcCustomer.username, password);
+    let authData;
+    try {
+      authData = await authenticateCustomer(wcCustomer.username, password);
+    } catch (err: any) {
+      console.error("authenticateCustomer failed:", err.response?.data || err.message);
+      if (err.response?.data?.code === 'rest_no_route') {
+        console.error("Server Configuration Error: The 'JWT Authentication for WP REST API' plugin is missing or misconfigured on the WordPress backend.");
+        return NextResponse.json(
+          { error: "Authentication service is currently unavailable. Please try again later." },
+          { status: 500 }
+        );
+      }
+      throw err;
+    }
 
     // Create our internal session
     const user: SessionUser = {
@@ -37,7 +56,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ user });
   } catch (error: any) {
-    console.error("Registration Error:", error.response?.data || error.message);
+    console.error("Registration Error Final Block:", error.response?.data || error.message);
     
     // Check if user already exists
     if (error.response?.data?.code === "registration-error-email-exists") {
