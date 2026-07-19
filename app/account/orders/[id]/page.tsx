@@ -129,7 +129,7 @@ export default function OrderDetailsPage() {
                 <span className="font-medium">{order.payment_method_title}</span>
               </div>
               <div className="flex justify-between pt-2 border-t border-border/50 font-bold">
-                <span>Total Paid</span>
+                <span>{order.status === "completed" || (order.status === "processing" && order.payment_method !== "cod") ? "Total Paid" : "Total Amount"}</span>
                 <span>₹{parseFloat(order.total).toLocaleString("en-IN")}</span>
               </div>
             </div>

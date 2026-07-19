@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full scroll-smooth antialiased">
+    <html lang="en" className="h-full scroll-smooth antialiased" data-scroll-behavior="smooth">
       <body className={`${poppins.variable} font-sans min-h-full flex flex-col bg-[#FAF8F3] text-[#2D2A26]`}>
         <AuthProvider>
           <Navbar />
