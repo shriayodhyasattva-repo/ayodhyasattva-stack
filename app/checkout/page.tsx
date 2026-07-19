@@ -19,7 +19,7 @@ declare global {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart: items, cartTotal, clearCart } = useCart();
+  const { cart: items, cartTotal, clearCart, isMounted } = useCart();
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(false);
@@ -49,19 +49,16 @@ export default function CheckoutPage() {
         lastName: user.lastName || "",
         email: user.email || "",
       }));
-      
-      // We could also fetch full profile here to pre-fill address, 
-      // but keeping it simple for the demo
     }
   }, [user]);
 
   useEffect(() => {
-    if (items.length === 0) {
+    if (isMounted && items.length === 0) {
       router.push("/cart");
     }
-  }, [items, router]);
+  }, [items, router, isMounted]);
 
-  if (items.length === 0) return null;
+  if (!isMounted || items.length === 0) return null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
