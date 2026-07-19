@@ -29,6 +29,7 @@ export async function POST(req: Request) {
       firstName: wcCustomer.first_name,
       lastName: wcCustomer.last_name,
       displayName: data.user_display_name,
+      jwtToken: data.token,
     };
 
     await createSession(user);

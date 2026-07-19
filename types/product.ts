@@ -328,7 +328,8 @@ export interface SessionUser {
   email: string;
   firstName: string;
   lastName: string;
-  displayName: string;
+  displayName?: string;
+  jwtToken?: string;
 }
 
 export interface AuthState {

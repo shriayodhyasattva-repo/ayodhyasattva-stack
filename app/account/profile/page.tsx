@@ -98,8 +98,11 @@ export default function ProfilePage() {
     
     // Frontend Validation
     const { billing } = formData;
-    if (billing.address_1 || billing.city || billing.country || billing.postcode || billing.phone) {
-      if (!billing.address_1 || !billing.city || !billing.country || !billing.postcode || !billing.phone) {
+    const activeCountry = billing.country || "IN";
+    
+    if (billing.address_1 || billing.city || activeCountry || billing.postcode || billing.phone) {
+      // If they started filling the address, make sure all critical fields are present
+      if (!billing.address_1 || !billing.city || !billing.postcode || !billing.phone) {
         toast.error("Incomplete Address", { 
           description: "If you provide an address, please fill out all fields: Street, City, Country, PIN, and Phone." 
         });
@@ -111,6 +114,11 @@ export default function ProfilePage() {
     
     // Copy billing to shipping if toggle is checked
     const payload = { ...formData };
+    
+    // Ensure country is passed even if unchanged
+    payload.billing.country = payload.billing.country || "IN";
+    payload.shipping.country = payload.shipping.country || "IN";
+
     if (sameAsBilling) {
       payload.shipping = { ...payload.billing };
     }
