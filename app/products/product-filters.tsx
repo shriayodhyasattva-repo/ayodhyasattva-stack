@@ -7,12 +7,12 @@ import { Search, Heart, Sparkles, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { CATEGORIES } from "@/lib/constants";
 
 interface FilterProps {
   currentCategory: string;
   currentSearch: string;
   currentSort: string;
+  categories: { name: string; slug: string }[];
 }
 
 /* ── Shared filter logic hook ───────────────────────────────────────────── */
@@ -56,10 +56,12 @@ export function SortDropdown({ currentSort }: { currentSort: string }) {
 function FilterContent({
   currentCategory,
   currentSearch,
+  categories,
   onClose,
 }: {
   currentCategory: string;
   currentSearch: string;
+  categories: { name: string; slug: string }[];
   onClose?: () => void;
 }) {
   const { updateParam } = useFilterActions();
@@ -124,7 +126,7 @@ function FilterContent({
           >
             All Categories
           </button>
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat.slug}
               onClick={() => handleCategoryClick(cat.slug)}
@@ -172,9 +174,11 @@ function FilterContent({
 export function MobileFilterDrawer({
   currentCategory,
   currentSearch,
+  categories,
 }: {
   currentCategory: string;
   currentSearch: string;
+  categories: { name: string; slug: string }[];
 }) {
   const [open, setOpen] = React.useState(false);
   const activeFilterCount =
@@ -198,6 +202,7 @@ export function MobileFilterDrawer({
         <FilterContent
           currentCategory={currentCategory}
           currentSearch={currentSearch}
+          categories={categories}
           onClose={() => setOpen(false)}
         />
         <div className="mt-6">
@@ -214,9 +219,11 @@ export function MobileFilterDrawer({
 export function FilterSidebar({
   currentCategory,
   currentSearch,
+  categories,
 }: {
   currentCategory: string;
   currentSearch: string;
+  categories: { name: string; slug: string }[];
 }) {
   return (
     <aside className="hidden lg:block lg:col-span-1">
@@ -224,6 +231,7 @@ export function FilterSidebar({
         <FilterContent
           currentCategory={currentCategory}
           currentSearch={currentSearch}
+          categories={categories}
         />
       </div>
     </aside>

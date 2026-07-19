@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       status: "processing",
       meta_data: [
         {
+          id: 0,
           key: "_razorpay_payment_id",
           value: razorpay_payment_id
         }

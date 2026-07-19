@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { CATEGORIES } from "@/lib/constants";
+import { getCategories } from "@/lib/woocommerce";
 
-export default function Collections() {
+export default async function Collections() {
   const categoryImages: Record<string, string> = {
     "temple-idols": "https://images.unsplash.com/photo-1609137144933-28682e825a07?auto=format&fit=crop&q=80&w=600",
     "pooja-essentials": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=600",
     "premium-incense": "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&q=80&w=600",
     "spiritual-books": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600",
   };
+
+  const categories = await getCategories();
 
   return (
     <section className="bg-background py-12 sm:py-20 border-b border-border/40">
@@ -27,7 +29,7 @@ export default function Collections() {
 
         {/* Collections Grid — 2 columns on mobile, 4 on desktop */}
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-          {CATEGORIES.map((category) => (
+          {categories.slice(0, 4).map((category) => (
             <Link
               key={category.slug}
               href={`/products?category=${category.slug}`}
@@ -37,7 +39,7 @@ export default function Collections() {
               {/* Overlay */}
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 z-10 transition-colors duration-300" />
               <img
-                src={categoryImages[category.slug] || category.image}
+                src={categoryImages[category.slug] || category.image?.src || "/images/placeholder.jpg"}
                 alt={category.name}
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
@@ -51,7 +53,7 @@ export default function Collections() {
                   {category.name}
                 </h3>
                 <p className="text-[10px] sm:text-xs text-white/80 mt-1 line-clamp-2 leading-relaxed hidden sm:block">
-                  {category.description}
+                  {category.description || "Explore our collection"}
                 </p>
 
                 {/* Always visible arrow on mobile */}
