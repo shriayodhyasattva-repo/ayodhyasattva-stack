@@ -25,6 +25,9 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [gateways, setGateways] = useState<any[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [countriesList, setCountriesList] = useState<{code: string, name: string}[]>([]);
+  const [statesList, setStatesList] = useState<{code: string, name: string}[]>([]);
+  const [pinError, setPinError] = useState("");
 
   useEffect(() => {
     // Fetch available payment gateways
@@ -37,6 +40,15 @@ export default function CheckoutPage() {
         }
       })
       .catch(err => console.error("Failed to load gateways", err));
+
+    // Fetch countries and default states for IN
+    fetch("/api/locations?countries=true&country=IN")
+      .then(res => res.json())
+      .then(data => {
+        if (data.countries) setCountriesList(data.countries);
+        if (data.states) setStatesList(data.states);
+      })
+      .catch(err => console.error("Failed to load locations", err));
   }, []);
 
   const [couponCode, setCouponCode] = useState("");
@@ -50,19 +62,43 @@ export default function CheckoutPage() {
     phone: "",
     address: "",
     city: "",
+    country: "IN",
     state: "",
     pincode: "",
   });
 
-  // Pre-fill user data if logged in
+  // Pre-fill user data and address if logged in
   useEffect(() => {
     if (user) {
       setFormData(prev => ({
         ...prev,
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
+        firstName: user.firstName || prev.firstName,
+        lastName: user.lastName || prev.lastName,
+        email: user.email || prev.email,
       }));
+
+      // Fetch full profile to get addresses
+      fetch("/api/customer")
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && data.customer) {
+            const customer = data.customer;
+            // Prefer billing address for checkout if available, otherwise shipping
+            const address = customer.billing?.address_1 ? customer.billing : customer.shipping;
+            if (address) {
+              setFormData(prev => ({
+                ...prev,
+                phone: address.phone || prev.phone,
+                address: address.address_1 || prev.address,
+                city: address.city || prev.city,
+                country: address.country || prev.country,
+                state: address.state || prev.state,
+                pincode: address.postcode || prev.pincode,
+              }));
+            }
+          }
+        })
+        .catch(err => console.error("Failed to load customer profile", err));
     }
   }, [user]);
 
@@ -74,9 +110,20 @@ export default function CheckoutPage() {
 
   if (!isInitialized || items.length === 0) return null;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    if (name === "country") {
+      // Fetch states for the new country
+      fetch(`/api/locations?country=${value}`)
+        .then(res => res.json())
+        .then(data => {
+          setStatesList(data.states || []);
+          setFormData(prev => ({ ...prev, state: "" })); // Reset state
+        })
+        .catch(err => console.error("Failed to load states", err));
+    }
   };
 
   const handleApplyCoupon = async () => {
@@ -105,8 +152,13 @@ export default function CheckoutPage() {
 
   const handlePayment = async () => {
     // Basic validation
-    if (!formData.firstName || !formData.email || !formData.address || !formData.phone) {
+    if (!formData.firstName || !formData.email || !formData.address || !formData.phone || !formData.country) {
       toast.error("Please fill in all required fields.");
+      return;
+    }
+    
+    if (statesList.length > 0 && !formData.state) {
+      toast.error("Please select a state.");
       return;
     }
 
@@ -124,7 +176,7 @@ export default function CheckoutPage() {
           city: formData.city,
           state: formData.state,
           postcode: formData.pincode,
-          country: "IN",
+          country: formData.country,
           email: formData.email,
           phone: formData.phone
         },
@@ -135,7 +187,7 @@ export default function CheckoutPage() {
           city: formData.city,
           state: formData.state,
           postcode: formData.pincode,
-          country: "IN",
+          country: formData.country,
         }
       };
 
@@ -295,12 +347,48 @@ export default function CheckoutPage() {
                   <Input id="city" name="city" value={formData.city} onChange={handleInputChange} required />
                 </div>
                 <div className="space-y-1.5">
-                  <label htmlFor="state" className="text-sm font-medium leading-none">State *</label>
-                  <Input id="state" name="state" value={formData.state} onChange={handleInputChange} required />
+                  <label htmlFor="country" className="text-sm font-medium leading-none">Country *</label>
+                  <select
+                    id="country"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    required
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="" disabled>Select Country</option>
+                    {countriesList.map(country => (
+                      <option key={country.code} value={country.code}>{country.name}</option>
+                    ))}
+                  </select>
                 </div>
+                {statesList.length > 0 && (
+                  <div className="space-y-1.5">
+                    <label htmlFor="state" className="text-sm font-medium leading-none">State *</label>
+                    <select
+                      id="state"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      required
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="" disabled>Select State</option>
+                      {statesList.map(state => (
+                        <option key={state.code} value={state.code}>{state.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="space-y-1.5">
-                  <label htmlFor="pincode" className="text-sm font-medium leading-none">PIN Code *</label>
-                  <Input id="pincode" name="pincode" value={formData.pincode} onChange={handleInputChange} required />
+                  <label htmlFor="pincode" className="text-sm font-medium leading-none">PIN / Zip Code *</label>
+                  <Input 
+                    id="pincode" 
+                    name="pincode" 
+                    value={formData.pincode} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
                 </div>
               </div>
             </section>

@@ -10,6 +10,9 @@ export default function ProfilePage() {
   const [customer, setCustomer] = useState<WCCustomer | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sameAsBilling, setSameAsBilling] = useState(false);
+  const [statesList, setStatesList] = useState<{code: string, name: string}[]>([]);
+  const [countriesList, setCountriesList] = useState<{code: string, name: string}[]>([]);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -41,6 +44,14 @@ export default function ProfilePage() {
     };
     
     fetchProfile();
+
+    fetch("/api/locations?countries=true&country=IN")
+      .then(res => res.json())
+      .then(data => {
+        if (data.countries) setCountriesList(data.countries);
+        if (data.states) setStatesList(data.states);
+      })
+      .catch(err => console.error("Failed to load locations", err));
   }, []);
 
   const handleBasicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,20 +59,38 @@ export default function ProfilePage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleBillingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBillingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ 
       ...prev, 
       billing: { ...prev.billing, [name]: value } 
     }));
+
+    if (name === "country") {
+      fetch(`/api/locations?country=${value}`)
+        .then(res => res.json())
+        .then(data => {
+          setStatesList(data.states || []);
+          setFormData(prev => ({ ...prev, billing: { ...prev.billing, state: "" } }));
+        });
+    }
   };
 
-  const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ 
       ...prev, 
       shipping: { ...prev.shipping, [name]: value } 
     }));
+
+    if (name === "country") {
+      fetch(`/api/locations?country=${value}`)
+        .then(res => res.json())
+        .then(data => {
+          setStatesList(data.states || []);
+          setFormData(prev => ({ ...prev, shipping: { ...prev.shipping, state: "" } }));
+        });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,10 +98,10 @@ export default function ProfilePage() {
     
     // Frontend Validation
     const { billing } = formData;
-    if (billing.address_1 || billing.city || billing.state || billing.postcode || billing.phone) {
-      if (!billing.address_1 || !billing.city || !billing.state || !billing.postcode || !billing.phone) {
+    if (billing.address_1 || billing.city || billing.country || billing.postcode || billing.phone) {
+      if (!billing.address_1 || !billing.city || !billing.country || !billing.postcode || !billing.phone) {
         toast.error("Incomplete Address", { 
-          description: "If you provide an address, please fill out all fields: Street, City, State, PIN, and Phone." 
+          description: "If you provide an address, please fill out all fields: Street, City, Country, PIN, and Phone." 
         });
         return;
       }
@@ -80,11 +109,17 @@ export default function ProfilePage() {
 
     setSaving(true);
     
+    // Copy billing to shipping if toggle is checked
+    const payload = { ...formData };
+    if (sameAsBilling) {
+      payload.shipping = { ...payload.billing };
+    }
+    
     try {
       const res = await fetch("/api/customer", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       
       if (!res.ok) {
@@ -148,13 +183,44 @@ export default function ProfilePage() {
                 <label className="text-xs font-semibold">City</label>
                 <Input name="city" value={formData.billing?.city || ""} onChange={handleBillingChange} className="h-9 text-xs" />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold">State</label>
-                <Input name="state" value={formData.billing?.state || ""} onChange={handleBillingChange} className="h-9 text-xs" />
+              <div className="space-y-1.5 col-span-2">
+                <label className="text-xs font-semibold">Country</label>
+                <select 
+                  name="country" 
+                  value={formData.billing?.country || "IN"} 
+                  onChange={handleBillingChange} 
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="" disabled>Select Country</option>
+                  {countriesList.map(country => (
+                    <option key={country.code} value={country.code}>{country.name}</option>
+                  ))}
+                </select>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold">PIN Code</label>
-                <Input name="postcode" value={formData.billing?.postcode || ""} onChange={handleBillingChange} className="h-9 text-xs" />
+              {statesList.length > 0 && (
+                <div className="space-y-1.5 col-span-2 sm:col-span-1">
+                  <label className="text-xs font-semibold">State</label>
+                  <select 
+                    name="state" 
+                    value={formData.billing?.state || ""} 
+                    onChange={handleBillingChange} 
+                    className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="" disabled>Select State</option>
+                    {statesList.map(state => (
+                      <option key={state.code} value={state.code}>{state.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="space-y-1.5 col-span-2 sm:col-span-1">
+                <label className="text-xs font-semibold">PIN / Zip Code</label>
+                <Input 
+                  name="postcode" 
+                  value={formData.billing?.postcode || ""} 
+                  onChange={handleBillingChange} 
+                  className="h-9 text-xs" 
+                />
               </div>
             </div>
             <div className="space-y-1.5">
@@ -165,8 +231,24 @@ export default function ProfilePage() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-sm font-bold border-b border-border/50 pb-2">Shipping Address</h3>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="flex items-center justify-between border-b border-border/50 pb-2">
+            <h3 className="text-sm font-bold">Shipping Address</h3>
+            <div className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                id="sameAsBilling" 
+                checked={sameAsBilling}
+                onChange={(e) => setSameAsBilling(e.target.checked)}
+                className="h-3 w-3 rounded text-gold border-border focus:ring-gold"
+              />
+              <label htmlFor="sameAsBilling" className="text-xs text-muted-foreground cursor-pointer">
+                Same as billing address
+              </label>
+            </div>
+          </div>
+          
+          {!sameAsBilling && (
+            <div className="grid grid-cols-1 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold">Street Address</label>
               <Input name="address_1" value={formData.shipping?.address_1 || ""} onChange={handleShippingChange} className="h-9 text-xs" />
@@ -176,16 +258,48 @@ export default function ProfilePage() {
                 <label className="text-xs font-semibold">City</label>
                 <Input name="city" value={formData.shipping?.city || ""} onChange={handleShippingChange} className="h-9 text-xs" />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold">State</label>
-                <Input name="state" value={formData.shipping?.state || ""} onChange={handleShippingChange} className="h-9 text-xs" />
+              <div className="space-y-1.5 col-span-2">
+                <label className="text-xs font-semibold">Country</label>
+                <select 
+                  name="country" 
+                  value={formData.shipping?.country || "IN"} 
+                  onChange={handleShippingChange} 
+                  className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="" disabled>Select Country</option>
+                  {countriesList.map(country => (
+                    <option key={country.code} value={country.code}>{country.name}</option>
+                  ))}
+                </select>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold">PIN Code</label>
-                <Input name="postcode" value={formData.shipping?.postcode || ""} onChange={handleShippingChange} className="h-9 text-xs" />
+              {statesList.length > 0 && (
+                <div className="space-y-1.5 col-span-2 sm:col-span-1">
+                  <label className="text-xs font-semibold">State</label>
+                  <select 
+                    name="state" 
+                    value={formData.shipping?.state || ""} 
+                    onChange={handleShippingChange} 
+                    className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="" disabled>Select State</option>
+                    {statesList.map(state => (
+                      <option key={state.code} value={state.code}>{state.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="space-y-1.5 col-span-2 sm:col-span-1">
+                <label className="text-xs font-semibold">PIN / Zip Code</label>
+                <Input 
+                  name="postcode" 
+                  value={formData.shipping?.postcode || ""} 
+                  onChange={handleShippingChange} 
+                  className="h-9 text-xs" 
+                />
               </div>
             </div>
           </div>
+          )}
         </div>
 
         <div className="pt-4 border-t border-border/50">

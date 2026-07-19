@@ -294,6 +294,26 @@ export async function getShippingMethods(zoneId: number): Promise<WCShippingMeth
   return response.data;
 }
 
+export async function getCountries(): Promise<{code: string, name: string}[]> {
+  try {
+    const response = await api.get('/data/countries');
+    return response.data || [];
+  } catch (error) {
+    console.error("Failed to fetch countries:", error);
+    return [];
+  }
+}
+
+export async function getStates(countryCode: string = "IN"): Promise<{code: string, name: string}[]> {
+  try {
+    const response = await api.get(`/data/countries/${countryCode}`);
+    return response.data.states || [];
+  } catch (error) {
+    console.error("Failed to fetch states:", error);
+    return [];
+  }
+}
+
 export async function getPaymentGateways(): Promise<WCPaymentGateway[]> {
     const response = await api.get("/payment_gateways");
   return response.data;
