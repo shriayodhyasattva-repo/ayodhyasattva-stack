@@ -7,10 +7,13 @@ export function useCart() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (!store.isInitialized && !store.isSyncing) {
+      store.fetchCart();
+    }
+  }, [store.isInitialized, store.isSyncing, store.fetchCart]);
 
   return {
-    cart: mounted ? store.cart : [],
+    cart: store.cart,
     wishlist: mounted ? store.wishlist : [],
     cartOpen: store.cartOpen,
     setCartOpen: store.setCartOpen,
@@ -20,8 +23,10 @@ export function useCart() {
     clearCart: store.clearCart,
     toggleWishlist: store.toggleWishlist,
     isInWishlist: store.isInWishlist,
-    cartTotal: mounted ? store.getCartTotal() : 0,
-    cartCount: mounted ? store.getCartCount() : 0,
+    cartTotal: store.getCartTotal(),
+    cartCount: store.getCartCount(),
     isMounted: mounted,
+    isInitialized: store.isInitialized,
+    isSyncing: store.isSyncing,
   };
 }

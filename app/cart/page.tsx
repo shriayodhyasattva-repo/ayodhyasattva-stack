@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Truck } from "lucide-react";
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeItem, cartTotal, cartCount, clearCart, isMounted } = useCart();
+  const { cart, updateQuantity, removeItem, cartTotal, cartCount, clearCart, isInitialized } = useCart();
 
-  if (!isMounted) {
+  if (!isInitialized) {
     return (
       <div className="bg-[#FAF8F3]/50 min-h-screen py-16 flex items-center justify-center">
         <div className="text-center space-y-2">
@@ -72,7 +72,9 @@ export default function CartPage() {
                           <h4 className="text-sm font-bold text-foreground hover:text-gold transition-colors">
                             <Link href={`/product/${item.product.slug}`}>{item.product.name}</Link>
                           </h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">{item.product.categories[0]?.name}</p>
+                          {item.product.categories && item.product.categories.length > 0 && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{item.product.categories[0]?.name}</p>
+                          )}
                           {item.selectedAttributes && item.selectedAttributes.length > 0 && (
                             <div className="flex gap-2 mt-1">
                               {item.selectedAttributes.map((attr) => (

@@ -1,6 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { getProductBySlug, getRelatedProducts, getProductReviews } from "@/lib/woocommerce";
+import { getProductBySlug, getRelatedProducts, getProductReviews, getProductVariations } from "@/lib/woocommerce";
 import ProductGallery from "@/components/product/product-gallery";
 import ProductCard from "@/components/product/product-card";
 import ClientActions from "./client-actions";
@@ -42,9 +42,10 @@ export default async function ProductPage({
   // Ensure related_ids exists before calling getRelatedProducts
   const relatedIds = product.related_ids || [];
   
-  const [relatedProducts, reviews] = await Promise.all([
+  const [relatedProducts, reviews, variations] = await Promise.all([
     relatedIds.length > 0 ? getRelatedProducts(relatedIds) : [],
-    getProductReviews(product.id)
+    getProductReviews(product.id),
+    product.type === "variable" ? getProductVariations(product.id) : []
   ]);
 
   return (
@@ -92,17 +93,6 @@ export default async function ProductPage({
               <span className="text-sm text-muted-foreground">({product.rating_count} Reviews)</span>
             </div>
 
-            <div className="flex items-end gap-3 mb-8">
-              <p className="text-3xl font-bold text-foreground">
-                ₹{parseFloat(product.price).toLocaleString("en-IN")}
-              </p>
-              {product.regular_price && product.regular_price !== product.price && (
-                <p className="text-lg text-muted-foreground line-through mb-1">
-                  ₹{parseFloat(product.regular_price).toLocaleString("en-IN")}
-                </p>
-              )}
-            </div>
-
             <div 
               className="prose prose-sm text-muted-foreground mb-8 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: product.short_description || product.description }}
@@ -125,7 +115,7 @@ export default async function ProductPage({
             </ul>
 
             {/* Add to Cart Actions (Client Component) */}
-            <ClientActions product={product} />
+            <ClientActions product={product} variations={variations} />
 
           </div>
         </div>

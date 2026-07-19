@@ -13,7 +13,8 @@ import {
   WCCustomer,
   CreateCustomerPayload,
   UpdateCustomerPayload,
-  WCPaymentGateway
+  WCPaymentGateway,
+  ProductVariation
 } from "@/types/product";
 
 const WOOCOMMERCE_URL = process.env.WOOCOMMERCE_URL || "";
@@ -57,6 +58,11 @@ api.interceptors.request.use((config) => {
 // WordPress JWT authentication API (requires JWT Authentication for WP REST API plugin)
 const wpAuthApi = axios.create({
   baseURL: `${WOOCOMMERCE_URL}/wp-json/jwt-auth/v1`,
+});
+
+// WooCommerce Store API (for Cart/Checkout, does not use OAuth)
+export const storeApi = axios.create({
+  baseURL: `${WOOCOMMERCE_URL}/wp-json/wc/store/v1`,
 });
 
 // Native Fetch wrapper for WooCommerce (Enables Next.js Data Cache & ISR)
@@ -135,6 +141,14 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return data[0];
   }
   return null;
+}
+
+export async function getProductVariations(productId: number): Promise<ProductVariation[]> {
+  const data = await fetchWCCached(`/products/${productId}/variations`, {
+    per_page: 100,
+  }, [`product-${productId}-variations`]);
+  
+  return data || [];
 }
 
 export async function getRelatedProducts(productIds: number[]): Promise<Product[]> {

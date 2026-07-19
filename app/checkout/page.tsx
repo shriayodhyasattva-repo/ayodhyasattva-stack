@@ -19,7 +19,7 @@ declare global {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart: items, cartTotal, clearCart, isMounted } = useCart();
+  const { cart: items, cartTotal, clearCart, isMounted, isInitialized } = useCart();
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(false);
@@ -53,12 +53,12 @@ export default function CheckoutPage() {
   }, [user]);
 
   useEffect(() => {
-    if (isMounted && items.length === 0) {
+    if (isInitialized && items.length === 0) {
       router.push("/cart");
     }
-  }, [items, router, isMounted]);
+  }, [items, router, isInitialized]);
 
-  if (!isMounted || items.length === 0) return null;
+  if (!isInitialized || items.length === 0) return null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

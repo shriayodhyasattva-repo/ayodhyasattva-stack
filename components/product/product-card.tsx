@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Product } from "@/types/product";
 import { useCart } from "@/hooks/use-cart";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Price from "./price";
 import { cn } from "@/lib/utils";
@@ -18,13 +19,18 @@ export default function ProductCard({ product, className }: ProductCardProps) {
   const { addItem, toggleWishlist, isInWishlist } = useCart();
   const isWishlisted = isInWishlist(product.id);
 
+  const router = useRouter();
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (product.type === "variable") {
+      router.push(`/product/${product.slug}`);
+      return;
+    }
+    
     addItem(product, 1);
-    toast.success(`Added to cart`, {
-      description: product.name,
-    });
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -89,7 +95,8 @@ export default function ProductCard({ product, className }: ProductCardProps) {
             className="w-full gap-1.5 shadow-sm font-medium"
             size="sm"
           >
-            <ShoppingCart className="h-3.5 w-3.5" /> Add to Cart
+            <ShoppingCart className="h-3.5 w-3.5" /> 
+            {product.type === "variable" ? "Select Options" : "Add to Cart"}
           </Button>
         </div>
       </Link>
@@ -130,7 +137,7 @@ export default function ProductCard({ product, className }: ProductCardProps) {
           className="sm:hidden mt-2.5 w-full h-10 flex items-center justify-center gap-1.5 rounded-lg bg-gold text-white text-xs font-semibold active:bg-gold-hover transition-colors"
         >
           <ShoppingCart className="h-3.5 w-3.5" />
-          Add to Cart
+          {product.type === "variable" ? "Select Options" : "Add to Cart"}
         </button>
       </div>
     </div>
