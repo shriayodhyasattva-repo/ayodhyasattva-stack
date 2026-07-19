@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Truck } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Truck, Image as ImageIcon } from "lucide-react";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeItem, cartTotal, cartCount, clearCart, isInitialized } = useCart();
@@ -62,11 +62,17 @@ export default function CartPage() {
                       {/* Left: Product Image & Details */}
                       <div className="flex gap-4 items-center">
                         <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
-                          <img
-                            src={item.product.images[0]?.src || "https://images.unsplash.com/photo-1609137144814-7d5267b137d5?auto=format&fit=crop&q=80&w=200"}
-                            alt={item.product.images[0]?.alt || item.product.name}
-                            className="h-full w-full object-cover"
-                          />
+                          {item.product.images?.[0]?.src ? (
+                            <img
+                              src={item.product.images[0].src}
+                              alt={item.product.images[0].alt || item.product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-muted/80 text-muted-foreground">
+                              <ImageIcon className="h-6 w-6 opacity-40" />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-foreground hover:text-gold transition-colors">
@@ -92,14 +98,14 @@ export default function CartPage() {
                         {/* Qty Controls */}
                         <div className="flex items-center border border-border rounded-lg bg-background">
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.selectedVariationId)}
+                            onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.selectedVariationId, item.key)}
                             className="p-1.5 text-muted-foreground hover:text-gold"
                           >
                             <Minus className="h-3.5 w-3.5" />
                           </button>
                           <span className="px-3 text-xs font-semibold text-foreground">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.selectedVariationId)}
+                            onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.selectedVariationId, item.key)}
                             className="p-1.5 text-muted-foreground hover:text-gold"
                           >
                             <Plus className="h-3.5 w-3.5" />
@@ -112,7 +118,7 @@ export default function CartPage() {
                             ₹{(parseFloat(item.product.price) * item.quantity).toLocaleString("en-IN")}
                           </span>
                           <button
-                            onClick={() => removeItem(item.product.id, item.selectedVariationId)}
+                            onClick={() => removeItem(item.product.id, item.selectedVariationId, item.key)}
                             className="text-muted-foreground/65 hover:text-destructive transition-colors p-1"
                           >
                             <Trash2 className="h-4.5 w-4.5" />

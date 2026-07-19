@@ -7,9 +7,9 @@ export async function POST(req: Request) {
     const body = await req.json();
     const headers = await getStoreApiHeaders();
     
-    // id -> product_id, quantity -> quantity, variation -> array of attrs
+    // Store API accepts variation_id as the primary id for variable products
     const payload: any = {
-      id: body.productId,
+      id: body.variationId || body.productId,
       quantity: body.quantity || 1,
     };
     if (body.variation) {

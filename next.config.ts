@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "http",
+        hostname: "woocommerce-dev.local",
+      },
       // When connecting your actual WooCommerce store, 
       // replace this with your actual WordPress hostname
       // {

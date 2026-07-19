@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingCart, Star, Image as ImageIcon } from "lucide-react";
 import { Product } from "@/types/product";
 import { useCart } from "@/hooks/use-cart";
 import { useRouter } from "next/navigation";
@@ -79,14 +79,17 @@ export default function ProductCard({ product, className }: ProductCardProps) {
           </span>
         )}
 
-        <img
-          src={
-            product.images[0]?.src ||
-            "https://images.unsplash.com/photo-1609137144814-7d5267b137d5?auto=format&fit=crop&q=80&w=400"
-          }
-          alt={product.images[0]?.alt || product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {product.images?.[0]?.src ? (
+          <img
+            src={product.images[0].src}
+            alt={product.images[0].alt || product.name}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-muted/80 text-muted-foreground transition-transform duration-500 group-hover:scale-105">
+            <ImageIcon className="h-8 w-8 opacity-40" />
+          </div>
+        )}
 
         {/* Desktop hover panel — hidden on mobile via sm: prefix */}
         <div className="hidden sm:flex absolute inset-x-0 bottom-0 z-10 translate-y-full p-3 transition-transform duration-300 group-hover:translate-y-0 bg-gradient-to-t from-background/95 via-background/60 to-transparent">

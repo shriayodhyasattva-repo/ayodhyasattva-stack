@@ -16,13 +16,35 @@ interface ClientDetailsActionsProps {
 export default function ClientDetailsActions({ product, variations }: ClientDetailsActionsProps) {
   const { addItem, toggleWishlist, isInWishlist } = useCart();
   const [quantity, setQuantity] = React.useState(1);
-  const [selectedAttributes, setSelectedAttributes] = React.useState<Record<string, string>>({});
+  const [selectedAttributes, setSelectedAttributes] = React.useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    if (product.default_attributes && product.default_attributes.length > 0) {
+      product.default_attributes.forEach(attr => {
+        // WooCommerce default_attributes often return the slug (e.g. 'green') instead of the label ('Green')
+        const productAttr = product.attributes?.find(a => a.name.toLowerCase() === attr.name.toLowerCase());
+        
+        let optionLabel = attr.option;
+        if (productAttr) {
+          // Find the exact label from the options array
+          const exactMatch = productAttr.options.find(
+            opt => opt.toLowerCase().replace(/\s+/g, '-') === attr.option.toLowerCase().replace(/\s+/g, '-') 
+                || opt.toLowerCase() === attr.option.toLowerCase()
+          );
+          if (exactMatch) optionLabel = exactMatch;
+        }
+        
+        initial[productAttr?.name || attr.name] = optionLabel;
+      });
+    }
+    return initial;
+  });
   
   const isWishlisted = isInWishlist(product.id);
 
   // Some WooCommerce configurations might omit `variation: true`, so we fallback to all attributes for variable products.
   const variationAttributes = product.attributes?.filter(a => a.variation || product.type === "variable") || [];
   const isVariable = product.type === "variable" && variationAttributes.length > 0;
+  const hasVariations = isVariable && variations && variations.length > 0;
 
   React.useEffect(() => {
     if (product.type === "variable") {
@@ -47,7 +69,12 @@ export default function ClientDetailsActions({ product, variations }: ClientDeta
         // If the variation attribute option is empty (""), it means "Any" value matches.
         if (vAttr.option === "") return true;
         
-        return userSelected === vAttr.option;
+        // WooCommerce often returns the slug in vAttr.option (e.g. 'green') but the label in product.attributes.options (e.g. 'Green').
+        // Therefore, we must do a case-insensitive comparison, and ideally a slugified comparison if it contains spaces.
+        const normalizedUser = userSelected?.toLowerCase().replace(/\s+/g, '-');
+        const normalizedOption = vAttr.option?.toLowerCase().replace(/\s+/g, '-');
+
+        return normalizedUser === normalizedOption || userSelected?.toLowerCase() === vAttr.option?.toLowerCase();
       });
     });
   }, [selectedAttributes, variations, isVariable]);
@@ -62,7 +89,27 @@ export default function ClientDetailsActions({ product, variations }: ClientDeta
     
   // Button disabled state
   const isVariationMissing = isVariable && Object.keys(selectedAttributes).length < variationAttributes.length;
+  
+  // Disable Add To Cart if out of stock, variation missing, or if it's a variable product but no match/no variations exist.
   const isAddToCartDisabled = isOutOfStock || isVariationMissing || (isVariable && !matchedVariation);
+
+  // Helper to check if an option actually exists in the available variations backend
+  const isOptionAvailable = React.useCallback((attrName: string, optionValue: string) => {
+    if (!hasVariations) return false;
+    
+    return variations!.some(v => {
+      const vAttr = v.attributes.find(a => a.name.toLowerCase() === attrName.toLowerCase());
+      if (!vAttr) return false;
+      
+      // If WooCommerce returns "" for option, it means "Any [Attribute]" so all options are valid.
+      if (vAttr.option === "") return true;
+      
+      const normalizedOption = vAttr.option.toLowerCase().replace(/\s+/g, '-');
+      const normalizedValue = optionValue.toLowerCase().replace(/\s+/g, '-');
+      
+      return normalizedOption === normalizedValue || vAttr.option.toLowerCase() === optionValue.toLowerCase();
+    });
+  }, [variations, hasVariations]);
 
   const incrementQty = () => setQuantity((prev) => prev + 1);
   const decrementQty = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
@@ -78,7 +125,7 @@ export default function ClientDetailsActions({ product, variations }: ClientDeta
 
   const handleAddToCart = () => {
     if (isVariable && !matchedVariation) {
-      toast.error("Please select product options before adding to cart.");
+      toast.error("Please select available product options before adding to cart.");
       return;
     }
 
@@ -128,32 +175,42 @@ export default function ClientDetailsActions({ product, variations }: ClientDeta
       </div>
 
       {/* Variation Selectors */}
-      {isVariable && variationAttributes.map(attr => (
-        <div key={attr.id} className="mb-4">
-          <label className="block text-sm font-semibold text-foreground mb-2">
-            {attr.name}
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {attr.options.map(option => {
-              const isSelected = selectedAttributes[attr.name] === option || selectedAttributes[attr.name.toLowerCase()] === option;
-              return (
-                <button
-                  key={option}
-                  onClick={() => handleAttributeSelect(attr.name, option)}
-                  className={cn(
-                    "px-4 py-2 border text-sm rounded-lg transition-colors",
-                    isSelected 
-                      ? "border-gold bg-soft-gold/10 text-gold font-semibold" 
-                      : "border-border bg-background text-foreground hover:border-gold/50"
-                  )}
-                >
-                  {option}
-                </button>
-              );
-            })}
-          </div>
+      {isVariable && !hasVariations ? (
+        <div className="mb-4 p-4 border border-destructive/20 bg-destructive/10 rounded-lg">
+          <p className="text-sm font-medium text-destructive">This product is currently unavailable.</p>
         </div>
-      ))}
+      ) : isVariable && hasVariations ? (
+        variationAttributes.map(attr => (
+          <div key={attr.id} className="mb-4">
+            <label className="block text-sm font-semibold text-foreground mb-2">
+              {attr.name}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {attr.options.map(option => {
+                const isSelected = selectedAttributes[attr.name] === option || selectedAttributes[attr.name.toLowerCase()] === option;
+                const available = isOptionAvailable(attr.name, option);
+                
+                return (
+                  <button
+                    key={option}
+                    onClick={() => available && handleAttributeSelect(attr.name, option)}
+                    disabled={!available}
+                    className={cn(
+                      "px-4 py-2 border text-sm rounded-lg transition-colors",
+                      !available && "opacity-40 cursor-not-allowed bg-muted",
+                      isSelected && available
+                        ? "border-gold bg-soft-gold/10 text-gold font-semibold" 
+                        : available && "border-border bg-background text-foreground hover:border-gold/50"
+                    )}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))
+      ) : null}
 
       {/* Quantity & Actions Row */}
       <div className="flex flex-col sm:flex-row gap-3 mt-4">

@@ -19,15 +19,14 @@ declare global {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart: items, cartTotal, clearCart, isMounted, isInitialized } = useCart();
+  const { cart: items, cartTotal, clearCart, isMounted, isInitialized, fetchCart } = useCart();
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [couponCode, setCouponCode] = useState("");
-  const [discount, setDiscount] = useState(0);
-  // Default flat fee shipping cost if not free shipping
-  const [shippingCost, setShippingCost] = useState(99);
+  // Let WooCommerce handle shipping and discount natively on the backend!
+  // We no longer calculate them on the frontend.
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -69,10 +68,10 @@ export default function CheckoutPage() {
     if (!couponCode) return;
     
     try {
-      const res = await fetch("/api/coupons/validate", {
+      const res = await fetch("/api/cart/apply-coupon", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode, cartTotal: cartTotal }),
+        body: JSON.stringify({ code: couponCode }),
       });
       
       const data = await res.json();
@@ -81,11 +80,10 @@ export default function CheckoutPage() {
         throw new Error(data.error);
       }
       
-      setDiscount(parseFloat(data.coupon.discount_amount));
-      if (data.coupon.free_shipping) setShippingCost(0);
+      // Store API automatically recalculates totals when coupon is applied
+      await fetchCart(); 
       toast.success("Coupon applied successfully!");
     } catch (error: any) {
-      setDiscount(0);
       toast.error(error.message || "Invalid coupon code");
     }
   };
@@ -100,14 +98,10 @@ export default function CheckoutPage() {
     setLoading(true);
     
     try {
-      const finalTotal = cartTotal - discount + shippingCost;
-      
-      // 1. Create WooCommerce Order
+      // 1. Create WooCommerce Order natively via Store API
+      // It handles line_items, coupons, shipping and taxes automatically based on cart session
       const orderPayload = {
         payment_method: paymentMethod,
-        payment_method_title: paymentMethod === "razorpay" ? "Credit Card / UPI / NetBanking" : "Cash on Delivery",
-        set_paid: false,
-        status: "pending",
         billing: {
           first_name: formData.firstName,
           last_name: formData.lastName,
@@ -127,16 +121,10 @@ export default function CheckoutPage() {
           state: formData.state,
           postcode: formData.pincode,
           country: "IN",
-        },
-        line_items: items.map(item => ({
-          product_id: item.product.id,
-          variation_id: item.selectedVariationId,
-          quantity: item.quantity,
-        })),
-        coupon_lines: discount > 0 ? [{ code: couponCode }] : []
+        }
       };
 
-      const orderRes = await fetch("/api/orders", {
+      const orderRes = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderPayload),
@@ -160,7 +148,8 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          amount: finalTotal,
+          // wcOrder.totals.total_price is passed directly.
+          amount: parseFloat(wcOrder.totals?.total_price || wcOrder.total || cartTotal),
           receipt: `rcptid_${wcOrder.id}`
         }),
       });
@@ -222,7 +211,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const finalAmount = cartTotal - discount + shippingCost;
+  const finalAmount = cartTotal;
 
   return (
     <div className="bg-[#FAF8F3] min-h-screen pt-24 pb-16">
@@ -383,31 +372,15 @@ export default function CheckoutPage() {
                   </div>
                   <Button variant="outline" onClick={handleApplyCoupon} disabled={!couponCode}>Apply</Button>
                 </div>
-                {discount > 0 && (
-                  <p className="text-xs text-green-600 mt-2 font-medium">
-                    Discount applied: -₹{discount.toLocaleString("en-IN")}
-                  </p>
-                )}
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  Coupon discounts are automatically calculated by WooCommerce in the total.
+                </p>
               </div>
 
               {/* Totals */}
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between text-muted-foreground">
-                  <p>Subtotal</p>
-                  <p className="font-medium text-foreground">₹{cartTotal.toLocaleString("en-IN")}</p>
-                </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <p>Discount</p>
-                    <p className="font-medium">-₹{discount.toLocaleString("en-IN")}</p>
-                  </div>
-                )}
-                <div className="flex justify-between text-muted-foreground">
-                  <p>Shipping</p>
-                  <p className="font-medium text-foreground">{shippingCost === 0 ? "Free" : `₹${shippingCost}`}</p>
-                </div>
-                <div className="flex justify-between pt-3 border-t border-border/50">
-                  <p className="text-base font-bold text-foreground">Total</p>
+                  <p>Cart Total (incl. taxes/shipping/discounts)</p>
                   <p className="text-lg font-bold text-foreground">₹{finalAmount.toLocaleString("en-IN")}</p>
                 </div>
               </div>
