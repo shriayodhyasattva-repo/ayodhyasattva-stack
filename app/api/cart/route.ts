@@ -6,22 +6,41 @@ import { storeApi } from "@/lib/woocommerce";
 // Helper to interact with WooCommerce Store API
 export async function getStoreApiHeaders() {
   const cookieStore = await cookies();
-  const cartToken = cookieStore.get("cart_token")?.value;
-  const nonce = cookieStore.get("nonce")?.value;
+  let cartToken = cookieStore.get("cart_token")?.value;
+  let nonce = cookieStore.get("nonce")?.value;
   const headers: any = {
     "Content-Type": "application/json",
   };
   
+  const session = await getSession();
+  if (session && (session as any).jwtToken) {
+    headers["Authorization"] = `Bearer ${(session as any).jwtToken}`;
+  }
+
+  // If we don't have a nonce (e.g., after login cleared stale cookies),
+  // bootstrap a fresh session by making a GET /cart request.
+  if (!nonce) {
+    try {
+      const bootstrapHeaders: any = { "Content-Type": "application/json" };
+      if (cartToken) bootstrapHeaders["Cart-Token"] = cartToken;
+      if (headers["Authorization"]) bootstrapHeaders["Authorization"] = headers["Authorization"];
+      
+      const res = await storeApi.get("/cart", { headers: bootstrapHeaders });
+      nonce = res.headers["nonce"];
+      cartToken = res.headers["cart-token"] || cartToken;
+      
+      // Persist the fresh tokens
+      await saveStoreHeaders(cartToken, nonce);
+    } catch (e) {
+      console.error("Failed to bootstrap Store API session:", e);
+    }
+  }
+
   if (cartToken) {
     headers["Cart-Token"] = cartToken;
   }
   if (nonce) {
     headers["Nonce"] = nonce;
-  }
-  
-  const session = await getSession();
-  if (session && (session as any).jwtToken) {
-    headers["Authorization"] = `Bearer ${(session as any).jwtToken}`;
   }
   
   return headers;
