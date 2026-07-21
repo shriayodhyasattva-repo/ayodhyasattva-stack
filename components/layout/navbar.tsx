@@ -8,10 +8,9 @@ import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 
-export default function Navbar() {
+export default function Navbar({ categories }: { categories: {name: string, slug: string}[] }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [categories, setCategories] = useState<{name: string, slug: string}[]>([]);
   const pathname = usePathname();
   
   const { cartCount, cart: items } = useCart();
@@ -25,22 +24,6 @@ export default function Navbar() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Fetch dynamic categories for navigation
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await fetch("/api/categories");
-        if (res.ok) {
-          const data = await res.json();
-          setCategories(data.categories.slice(0, 5)); // show top 5
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchCategories();
   }, []);
 
   const navLinks = [

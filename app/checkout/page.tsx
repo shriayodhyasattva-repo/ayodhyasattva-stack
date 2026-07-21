@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/lib/auth-context";
@@ -442,16 +443,17 @@ export default function CheckoutPage() {
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 mb-6">
                 {items.map((item, idx) => (
                   <div key={idx} className="flex gap-4">
-                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-border">
-                      <img
+                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-border relative">
+                      <Image
                         src={item.product.images?.[0]?.src || "/placeholder.jpg"}
                         alt={item.product.name}
-                        className="h-full w-full object-cover object-center"
+                        fill
+                        className="object-cover object-center"
                       />
                     </div>
                     <div className="flex flex-1 flex-col justify-center">
                       <div className="flex justify-between text-sm font-medium text-foreground">
-                        <h3 className="line-clamp-2 pr-4">{item.product.name}</h3>
+                        <h3 className="line-clamp-2 pr-4" dangerouslySetInnerHTML={{ __html: item.product.name }} />
                         <p className="ml-4 whitespace-nowrap">₹{parseFloat(item.product.price).toLocaleString("en-IN")}</p>
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">Qty: {item.quantity}</p>

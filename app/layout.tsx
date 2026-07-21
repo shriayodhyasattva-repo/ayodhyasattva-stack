@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import { getCategories } from "@/lib/woocommerce";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -17,16 +18,19 @@ export const metadata: Metadata = {
   description: "Experience the divinity of Ayodhya with our premium collections of handcrafted temple idols, pooja essentials, spiritual items, and sacred decor.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const categories = await getCategories();
+  const navCategories = categories.slice(0, 5).map(c => ({ name: c.name, slug: c.slug }));
+
   return (
     <html lang="en" className="h-full scroll-smooth antialiased" data-scroll-behavior="smooth">
       <body className={`${poppins.variable} font-sans min-h-full flex flex-col bg-[#FAF8F3] text-[#2D2A26]`}>
         <AuthProvider>
-          <Navbar />
+          <Navbar categories={navCategories} />
         <main className="flex-grow flex flex-col">{children}</main>
         <Footer />
         <Toaster position="bottom-right" richColors />

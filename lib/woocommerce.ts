@@ -285,19 +285,19 @@ export async function getProductReplies(productId: number): Promise<any[]> {
 /* ─── Shipping & Payment ────────────────────────────────────────────────── */
 
 export async function getShippingZones(): Promise<WCShippingZone[]> {
-    const response = await api.get("/shipping/zones");
-  return response.data;
+  const data = await fetchWCCached("/shipping/zones", {}, ["shipping-zones"]);
+  return data;
 }
 
 export async function getShippingMethods(zoneId: number): Promise<WCShippingMethod[]> {
-    const response = await api.get(`/shipping/zones/${zoneId}/methods`);
-  return response.data;
+  const data = await fetchWCCached(`/shipping/zones/${zoneId}/methods`, {}, [`shipping-methods-${zoneId}`]);
+  return data;
 }
 
 export async function getCountries(): Promise<{code: string, name: string}[]> {
   try {
-    const response = await api.get('/data/countries');
-    return response.data || [];
+    const data = await fetchWCCached("/data/countries", {}, ["countries"]);
+    return data || [];
   } catch (error) {
     console.error("Failed to fetch countries:", error);
     return [];
@@ -306,8 +306,8 @@ export async function getCountries(): Promise<{code: string, name: string}[]> {
 
 export async function getStates(countryCode: string = "IN"): Promise<{code: string, name: string}[]> {
   try {
-    const response = await api.get(`/data/countries/${countryCode}`);
-    return response.data.states || [];
+    const data = await fetchWCCached(`/data/countries/${countryCode}`, {}, [`states-${countryCode}`]);
+    return data.states || [];
   } catch (error) {
     console.error("Failed to fetch states:", error);
     return [];
@@ -315,6 +315,6 @@ export async function getStates(countryCode: string = "IN"): Promise<{code: stri
 }
 
 export async function getPaymentGateways(): Promise<WCPaymentGateway[]> {
-    const response = await api.get("/payment_gateways");
-  return response.data;
+  const data = await fetchWCCached("/payment_gateways", {}, ["payment-gateways"]);
+  return data;
 }

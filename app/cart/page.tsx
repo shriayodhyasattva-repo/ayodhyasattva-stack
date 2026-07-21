@@ -90,7 +90,9 @@ export default function CartPage() {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-foreground hover:text-gold transition-colors">
-                            <Link href={`/product/${item.product.slug}`}>{item.product.name}</Link>
+                            <Link href={`/product/${item.product.slug}`}>
+                              <span dangerouslySetInnerHTML={{ __html: item.product.name }} />
+                            </Link>
                           </h4>
                           {item.product.categories && item.product.categories.length > 0 && (
                             <p className="text-xs text-muted-foreground mt-0.5">{item.product.categories[0]?.name}</p>

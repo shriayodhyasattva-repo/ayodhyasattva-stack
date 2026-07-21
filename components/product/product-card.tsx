@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, ShoppingCart, Star, Image as ImageIcon } from "lucide-react";
 import { Product } from "@/types/product";
 import { useCart } from "@/hooks/use-cart";
@@ -13,9 +14,10 @@ import { toast } from "sonner";
 interface ProductCardProps {
   product: Product;
   className?: string;
+  priority?: boolean;
 }
 
-export default function ProductCard({ product, className }: ProductCardProps) {
+export default function ProductCard({ product, className, priority = false }: ProductCardProps) {
   const { addItem, toggleWishlist, isInWishlist } = useCart();
   const isWishlisted = isInWishlist(product.id);
 
@@ -80,10 +82,13 @@ export default function ProductCard({ product, className }: ProductCardProps) {
         )}
 
         {product.images?.[0]?.src ? (
-          <img
+          <Image
             src={product.images[0].src}
             alt={product.images[0].alt || product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority={priority}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-muted/80 text-muted-foreground transition-transform duration-500 group-hover:scale-105">

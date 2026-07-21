@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { getCategories } from "@/lib/woocommerce";
 
@@ -38,10 +39,12 @@ export default async function Collections() {
             >
               {/* Overlay */}
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 z-10 transition-colors duration-300" />
-              <img
+              <Image
                 src={categoryImages[category.slug] || category.image?.src || "/images/placeholder.jpg"}
                 alt={category.name}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                fill
+                sizes="(max-width: 640px) 50vw, 25vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
 
               {/* Text Overlay */}

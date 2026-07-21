@@ -93,10 +93,32 @@ export const useCartStore = create<CartState>()(
       },
       
       addItem: async (product, quantity = 1, selectedVariationId, selectedAttributes) => {
+        const previousCart = get().cart;
+        
+        // Optimistic UI update
+        const tempKey = `temp-${Date.now()}`;
+        const existingItemIndex = previousCart.findIndex(i => 
+          i.product.id === product.id && i.selectedVariationId === selectedVariationId
+        );
+        
+        const newCart = [...previousCart];
+        if (existingItemIndex > -1) {
+          newCart[existingItemIndex] = {
+            ...newCart[existingItemIndex],
+            quantity: newCart[existingItemIndex].quantity + quantity
+          };
+        } else {
+          newCart.push({
+            key: tempKey,
+            product,
+            quantity,
+            selectedVariationId,
+            selectedAttributes
+          });
+        }
+        set({ cart: newCart, isSyncing: true, cartOpen: true });
+        
         try {
-          set({ isSyncing: true });
-          
-          // Optimistic UI could go here, but for now we wait for backend
           const res = await fetch("/api/cart/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -108,8 +130,8 @@ export const useCartStore = create<CartState>()(
           
           (get() as any).syncWithBackend(data);
           toast.success("Added to cart");
-          set({ cartOpen: true });
         } catch (error: any) {
+          set({ cart: previousCart }); // Revert
           toast.error("Failed to add to cart", { description: error.message });
         } finally {
           set({ isSyncing: false });
@@ -124,8 +146,13 @@ export const useCartStore = create<CartState>()(
         }
         if (!key) return;
 
+        const previousCart = get().cart;
+        set({ 
+          cart: previousCart.filter(i => i.key !== key), 
+          isSyncing: true 
+        });
+
         try {
-          set({ isSyncing: true });
           const res = await fetch("/api/cart/remove", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -133,10 +160,12 @@ export const useCartStore = create<CartState>()(
           });
           
           const data = await res.json();
+          if (!res.ok) throw new Error("Failed to remove item");
           if (res.ok) {
             (get() as any).syncWithBackend(data);
           }
         } catch (error) {
+          set({ cart: previousCart }); // Revert
           toast.error("Failed to remove item");
         } finally {
           set({ isSyncing: false });
@@ -155,8 +184,13 @@ export const useCartStore = create<CartState>()(
           return;
         }
         
+        const previousCart = get().cart;
+        set({
+          cart: previousCart.map(i => i.key === key ? { ...i, quantity } : i),
+          isSyncing: true
+        });
+
         try {
-          set({ isSyncing: true });
           const res = await fetch("/api/cart/update", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -164,10 +198,12 @@ export const useCartStore = create<CartState>()(
           });
           
           const data = await res.json();
+          if (!res.ok) throw new Error("Failed to update quantity");
           if (res.ok) {
             (get() as any).syncWithBackend(data);
           }
         } catch (error) {
+          set({ cart: previousCart }); // Revert
           toast.error("Failed to update quantity");
         } finally {
           set({ isSyncing: false });
