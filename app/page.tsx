@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export default async function Home() {
   // Fetch featured products for the homepage highlight grid
-  const featuredProducts = await getProducts({ featured: true });
+  const { data: featuredProducts } = await getProducts({ featured: true });
 
   return (
     <div className="bg-[#FAF8F3]/40 min-h-screen">

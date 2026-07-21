@@ -14,7 +14,8 @@ import {
   CreateCustomerPayload,
   UpdateCustomerPayload,
   WCPaymentGateway,
-  ProductVariation
+  ProductVariation,
+  PaginatedResponse
 } from "@/types/product";
 
 const WOOCOMMERCE_URL = process.env.WOOCOMMERCE_URL || "";
@@ -99,13 +100,17 @@ async function fetchWCCached(endpoint: string, queryParams: Record<string, any> 
     throw new Error(`WooCommerce API Error: ${res.status} ${res.statusText}`);
   }
 
-  return res.json();
+  return {
+    data: await res.json(),
+    totalPages: parseInt(res.headers.get("x-wp-totalpages") || "1", 10),
+    totalCount: parseInt(res.headers.get("x-wp-total") || "0", 10),
+  };
 }
 
 
 /* ─── Products ──────────────────────────────────────────────────────────── */
 
-export async function getProducts(params?: WCProductsParams): Promise<Product[]> {
+export async function getProducts(params?: WCProductsParams): Promise<PaginatedResponse<Product>> {
   let categoryId = params?.category;
   
   if (typeof categoryId === 'string' && isNaN(Number(categoryId))) {
@@ -116,7 +121,7 @@ export async function getProducts(params?: WCProductsParams): Promise<Product[]>
     }
   }
 
-  const data = await fetchWCCached("/products", {
+  const response = await fetchWCCached("/products", {
     status: "publish",
     per_page: params?.per_page || 12,
     page: params?.page || 1,
@@ -133,49 +138,49 @@ export async function getProducts(params?: WCProductsParams): Promise<Product[]>
     exclude: params?.exclude?.join(','),
   }, ["products"]);
   
-  return data;
+  return response;
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const data = await fetchWCCached("/products", {
+  const response = await fetchWCCached("/products", {
     slug: slug,
     status: "publish",
   }, ["products", `product-${slug}`]);
 
-  if (data && data.length > 0) {
-    return data[0];
+  if (response.data && response.data.length > 0) {
+    return response.data[0];
   }
   return null;
 }
 
 export async function getProductVariations(productId: number): Promise<ProductVariation[]> {
-  const data = await fetchWCCached(`/products/${productId}/variations`, {
+  const response = await fetchWCCached(`/products/${productId}/variations`, {
     per_page: 100,
   }, [`product-${productId}-variations`]);
   
-  return data || [];
+  return response.data || [];
 }
 
 export async function getRelatedProducts(productIds: number[]): Promise<Product[]> {
   if (!productIds || productIds.length === 0) return [];
   
-  const data = await fetchWCCached("/products", {
+  const response = await fetchWCCached("/products", {
     include: productIds.slice(0, 4).join(','),
     status: "publish",
   }, ["products"]);
   
-  return data;
+  return response.data;
 }
 
 /* ─── Categories ────────────────────────────────────────────────────────── */
 
 export async function getCategories(): Promise<WCCategory[]> {
-  const data = await fetchWCCached("/products/categories", {
+  const response = await fetchWCCached("/products/categories", {
     hide_empty: true,
     per_page: 100,
   }, ["categories"]);
   
-  return data;
+  return response.data;
 }
 
 /* ─── Orders ────────────────────────────────────────────────────────────── */
@@ -285,19 +290,19 @@ export async function getProductReplies(productId: number): Promise<any[]> {
 /* ─── Shipping & Payment ────────────────────────────────────────────────── */
 
 export async function getShippingZones(): Promise<WCShippingZone[]> {
-  const data = await fetchWCCached("/shipping/zones", {}, ["shipping-zones"]);
-  return data;
+  const response = await fetchWCCached("/shipping/zones", {}, ["shipping-zones"]);
+  return response.data;
 }
 
 export async function getShippingMethods(zoneId: number): Promise<WCShippingMethod[]> {
-  const data = await fetchWCCached(`/shipping/zones/${zoneId}/methods`, {}, [`shipping-methods-${zoneId}`]);
-  return data;
+  const response = await fetchWCCached(`/shipping/zones/${zoneId}/methods`, {}, [`shipping-methods-${zoneId}`]);
+  return response.data;
 }
 
 export async function getCountries(): Promise<{code: string, name: string}[]> {
   try {
-    const data = await fetchWCCached("/data/countries", {}, ["countries"]);
-    return data || [];
+    const response = await fetchWCCached("/data/countries", {}, ["countries"]);
+    return response.data || [];
   } catch (error) {
     console.error("Failed to fetch countries:", error);
     return [];
@@ -306,8 +311,8 @@ export async function getCountries(): Promise<{code: string, name: string}[]> {
 
 export async function getStates(countryCode: string = "IN"): Promise<{code: string, name: string}[]> {
   try {
-    const data = await fetchWCCached(`/data/countries/${countryCode}`, {}, [`states-${countryCode}`]);
-    return data.states || [];
+    const response = await fetchWCCached(`/data/countries/${countryCode}`, {}, [`states-${countryCode}`]);
+    return response.data.states || [];
   } catch (error) {
     console.error("Failed to fetch states:", error);
     return [];
@@ -315,6 +320,6 @@ export async function getStates(countryCode: string = "IN"): Promise<{code: stri
 }
 
 export async function getPaymentGateways(): Promise<WCPaymentGateway[]> {
-  const data = await fetchWCCached("/payment_gateways", {}, ["payment-gateways"]);
-  return data;
+  const response = await fetchWCCached("/payment_gateways", {}, ["payment-gateways"]);
+  return response.data;
 }

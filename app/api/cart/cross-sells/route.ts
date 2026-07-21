@@ -19,7 +19,7 @@ export async function GET() {
     
     // 3. Fetch full product details from REST API to get cross_sell_ids
     // The Store API doesn't expose cross_sells by default.
-    const productsInCart = await getProducts({ include: productIdsInCart });
+    const { data: productsInCart } = await getProducts({ include: productIdsInCart });
     
     // 4. Aggregate all unique cross_sell_ids
     const crossSellIds = new Set<number>();
@@ -39,7 +39,7 @@ export async function GET() {
       return NextResponse.json({ products: [] });
     }
 
-    const crossSells = await getProducts({ include: Array.from(crossSellIds) });
+    const { data: crossSells } = await getProducts({ include: Array.from(crossSellIds) });
 
     return NextResponse.json({ products: crossSells });
   } catch (error: any) {

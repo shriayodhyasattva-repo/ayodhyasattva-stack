@@ -5,6 +5,7 @@ import ProductCard from "@/components/product/product-card";
 import { SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SortSelect from "./sort-select";
+import StorePagination from "@/components/store-pagination";
 
 
 export const metadata = {
@@ -30,7 +31,7 @@ export default async function ProductsPage({
   if (currentSort === "popularity") { orderby = "popularity"; }
 
   // Fetch data
-  const [products, categories] = await Promise.all([
+  const [{ data: products, totalPages }, categories] = await Promise.all([
     getProducts({
       category: currentCategory !== "all" ? currentCategory : undefined,
       orderby,
@@ -123,14 +124,8 @@ export default async function ProductsPage({
                   ))}
                 </div>
                 
-                {/* Basic Pagination (Assuming more pages if exactly 24 returned) */}
-                {products.length === 24 && (
-                   <div className="mt-12 flex justify-center">
-                    <Link href={`/products?category=${currentCategory}&sort=${currentSort}&page=${page + 1}`}>
-                      <Button variant="outline">Load More</Button>
-                    </Link>
-                   </div>
-                )}
+                {/* Real Pagination Component */}
+                <StorePagination totalPages={totalPages} />
               </>
             )}
           </div>

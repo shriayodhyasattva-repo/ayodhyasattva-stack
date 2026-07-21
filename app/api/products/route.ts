@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       else params[key] = value;
     });
 
-    const products = await getProducts(params);
+    const { data: products } = await getProducts(params);
     return NextResponse.json({ products });
   } catch (error: any) {
     console.error("Products API Error:", error);

@@ -5,6 +5,12 @@ export interface ProductImage {
   alt: string;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalPages: number;
+  totalCount: number;
+}
+
 export interface ProductCategory {
   id: number;
   name: string;
