@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import "./globals.css";
+import { Suspense } from "react";
 import { AuthProvider } from "@/lib/auth-context";
 import { getCategories } from "@/lib/woocommerce";
 
@@ -30,7 +31,9 @@ export default async function RootLayout({
     <html lang="en" className="h-full scroll-smooth antialiased" data-scroll-behavior="smooth">
       <body className={`${poppins.variable} font-sans min-h-full flex flex-col bg-[#FAF8F3] text-[#2D2A26]`}>
         <AuthProvider>
-          <Navbar categories={navCategories} />
+          <Suspense fallback={<div className="h-20 w-full" />}>
+            <Navbar categories={navCategories} />
+          </Suspense>
         <main className="flex-grow flex flex-col">{children}</main>
         <Footer />
         <Toaster position="bottom-right" richColors />

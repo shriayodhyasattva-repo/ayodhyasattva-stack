@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Search, ShoppingBag, Menu, X, Sparkles, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/lib/auth-context";
@@ -12,6 +12,8 @@ export default function Navbar({ categories }: { categories: {name: string, slug
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentCategory = searchParams.get("category");
   
   const { cartCount, cart: items } = useCart();
   const { user, isLoggedIn } = useAuth();
@@ -31,6 +33,17 @@ export default function Navbar({ categories }: { categories: {name: string, slug
     { name: "All Products", href: "/products" },
     ...categories.map(c => ({ name: c.name, href: `/products?category=${c.slug}` })),
   ];
+
+  const checkIsActive = (href: string) => {
+    if (href === "/products") {
+      return pathname === "/products" && !currentCategory;
+    }
+    if (href.startsWith("/products?category=")) {
+      const slug = href.split("=")[1];
+      return pathname === "/products" && currentCategory === slug;
+    }
+    return pathname === href;
+  };
 
   return (
     <header
@@ -76,7 +89,7 @@ export default function Navbar({ categories }: { categories: {name: string, slug
                 key={link.name}
                 href={link.href}
                 className={`text-sm font-medium transition-colors hover:text-gold ${
-                  pathname === link.href ? "text-gold" : "text-foreground/80"
+                  checkIsActive(link.href) ? "text-gold" : "text-foreground/80"
                 }`}
               >
                 {link.name}
@@ -119,7 +132,7 @@ export default function Navbar({ categories }: { categories: {name: string, slug
                 key={link.name}
                 href={link.href}
                 className={`block rounded-md px-3 py-2 text-base font-medium ${
-                  pathname === link.href
+                  checkIsActive(link.href)
                     ? "bg-soft-gold text-gold"
                     : "text-foreground hover:bg-muted/10"
                 }`}
