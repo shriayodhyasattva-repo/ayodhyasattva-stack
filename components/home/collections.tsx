@@ -4,13 +4,6 @@ import { ArrowRight } from "lucide-react";
 import { getCategories } from "@/lib/woocommerce";
 
 export default async function Collections() {
-  const categoryImages: Record<string, string> = {
-    "temple-idols": "https://images.unsplash.com/photo-1609137144933-28682e825a07?auto=format&fit=crop&q=80&w=600",
-    "pooja-essentials": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=600",
-    "premium-incense": "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&q=80&w=600",
-    "spiritual-books": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600",
-  };
-
   const categories = await getCategories();
 
   return (
@@ -39,13 +32,19 @@ export default async function Collections() {
             >
               {/* Overlay */}
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 z-10 transition-colors duration-300" />
-              <Image
-                src={categoryImages[category.slug] || category.image?.src || "/images/placeholder.jpg"}
-                alt={category.name}
-                fill
-                sizes="(max-width: 640px) 50vw, 25vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+              {category.image?.src ? (
+                <Image
+                  src={category.image.src}
+                  alt={category.name}
+                  fill
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-gold/40 to-amber-900/40 transition-transform duration-500 group-hover:scale-105 flex items-center justify-center">
+                  <span className="text-4xl font-serif text-white/50">{category.name.charAt(0)}</span>
+                </div>
+              )}
 
               {/* Text Overlay */}
               <div className="relative z-20 mt-auto p-3 sm:p-6 text-white">
