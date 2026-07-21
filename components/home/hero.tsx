@@ -18,9 +18,9 @@ export default function Hero() {
         <div className="block lg:hidden">
           <div className="relative w-full aspect-[4/3] overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1609137144814-7d5267b137d5?auto=format&fit=crop&q=80&w=800"
+              src="/ayodhya-ram-mandir-ramlala-hd-photo-png-transparent-image-allpngfree.png"
               alt="Divine Brass Idol Showcase"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover object-top"
             />
             {/* Dark gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#FAF8F3] via-[#FAF8F3]/40 to-transparent" />
@@ -115,9 +115,9 @@ export default function Hero() {
           <div className="col-span-5">
             <div className="relative mx-auto max-w-[420px] aspect-[4/5] rounded-2xl overflow-hidden border border-border shadow-xl bg-background group">
               <img
-                src="https://images.unsplash.com/photo-1609137144814-7d5267b137d5?auto=format&fit=crop&q=80&w=800"
+                src="/ayodhya-ram-mandir-ramlala-hd-photo-png-transparent-image-allpngfree.png"
                 alt="Divine Brass Idol Showcase"
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-6">
                 <div className="text-white">

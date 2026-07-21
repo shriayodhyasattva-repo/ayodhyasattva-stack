@@ -34,12 +34,12 @@ export async function POST(req: Request) {
 
     await createSession(user);
 
-    // Clear stale cart cookies from the previous anonymous/guest session.
-    // The next cart request will use the JWT token to establish a fresh
+    // Clear stale nonce from the previous anonymous/guest session.
+    // We KEEP the cart_token so WooCommerce can merge the guest cart with the user's cart.
+    // The next cart request will use the JWT token and old cart-token to establish a fresh
     // WooCommerce session and receive a new valid nonce + cart-token.
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    cookieStore.delete("cart_token");
     cookieStore.delete("nonce");
 
     return NextResponse.json({ user });

@@ -17,6 +17,7 @@ export function useCart() {
     wishlist: mounted ? store.wishlist : [],
     cartOpen: store.cartOpen,
     setCartOpen: store.setCartOpen,
+    fetchCart: store.fetchCart,
     addItem: store.addItem,
     removeItem: store.removeItem,
     updateQuantity: store.updateQuantity,

@@ -54,6 +54,11 @@ export async function POST(req: Request) {
 
     await createSession(user);
 
+    // Clear stale nonce from the guest session so the cart can refresh and merge
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    cookieStore.delete("nonce");
+
     return NextResponse.json({ user });
   } catch (error: any) {
     console.error("Registration Error Final Block:", error.response?.data || error.message);

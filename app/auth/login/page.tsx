@@ -1,18 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Sparkles, ArrowRight } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const { refreshSession } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/account";
+  const { refreshSession, user, isLoading } = useAuth();
   
+  React.useEffect(() => {
+    if (!isLoading && user) {
+      router.push(redirectPath);
+    }
+  }, [user, isLoading, router, redirectPath]);
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
@@ -52,7 +60,7 @@ export default function LoginPage() {
         description: `Successfully signed in as ${data.user.displayName}`,
       });
       
-      router.push("/account");
+      router.push(redirectPath);
     } catch (error: any) {
       toast.error("Authentication Failed", {
         description: error.message,
@@ -78,7 +86,7 @@ export default function LoginPage() {
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Or{" "}
-          <Link href="/auth/register" className="font-medium text-gold hover:text-gold-hover transition-colors">
+          <Link href={`/auth/register?redirect=${encodeURIComponent(redirectPath)}`} className="font-medium text-gold hover:text-gold-hover transition-colors">
             create a new account
           </Link>
         </p>
@@ -162,5 +170,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#FAF8F3]/50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="flex justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gold border-t-transparent mx-auto" />
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

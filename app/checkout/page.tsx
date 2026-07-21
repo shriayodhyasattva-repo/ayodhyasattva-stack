@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { toast } from "sonner";
-import { ChevronRight, ShieldCheck, Tag, ArrowRight } from "lucide-react";
+import { ChevronRight, ShieldCheck, Tag, ArrowRight, Check, User as UserIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 declare global {
   interface Window {
@@ -21,8 +22,13 @@ declare global {
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart: items, cartTotal, clearCart, isMounted, isInitialized, fetchCart } = useCart();
-  const { user } = useAuth();
+  const { user, refreshSession } = useAuth();
   
+  const [authMode, setAuthMode] = useState<"guest" | "login" | "register">("guest");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [contactCompleted, setContactCompleted] = useState(false);
+  const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [gateways, setGateways] = useState<any[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -71,6 +77,7 @@ export default function CheckoutPage() {
   // Pre-fill user data and address if logged in
   useEffect(() => {
     if (user) {
+      setContactCompleted(true);
       setFormData(prev => ({
         ...prev,
         firstName: user.firstName || prev.firstName,
@@ -148,6 +155,62 @@ export default function CheckoutPage() {
       toast.success("Coupon applied successfully!");
     } catch (error: any) {
       toast.error(error.message || "Invalid coupon code");
+    }
+  };
+
+  const handleInlineAuth = async () => {
+    if (authMode === "guest") {
+      if (!formData.firstName || !formData.email || !formData.phone) {
+        toast.error("Please provide name, email, and phone to continue.");
+        return;
+      }
+      setContactCompleted(true);
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      if (authMode === "login") {
+        if (!formData.email || !password) {
+          toast.error("Please enter email and password");
+          return;
+        }
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: formData.email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Login failed");
+        
+        await refreshSession();
+        toast.success("Logged in successfully!");
+      } else if (authMode === "register") {
+        if (!formData.email || !password || !formData.firstName || !formData.lastName) {
+          toast.error("Please fill in all fields");
+          return;
+        }
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            password,
+            firstName: formData.firstName,
+            lastName: formData.lastName
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Registration failed");
+        
+        await refreshSession();
+        toast.success("Account created successfully!");
+      }
+      setContactCompleted(true);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -306,46 +369,101 @@ export default function CheckoutPage() {
           <div className="lg:col-span-7 space-y-10">
             
             {/* Contact Info */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Contact Information</h2>
-                {!user && (
-                  <p className="text-sm text-muted-foreground">
-                    Already have an account? <Link href="/auth/login" className="text-gold hover:underline">Log in</Link>
-                  </p>
+            <section className={cn("space-y-6 rounded-xl border border-border p-6 transition-all", contactCompleted ? "bg-muted/5 border-muted" : "bg-white shadow-sm")}>
+              <div className="flex items-center justify-between border-b border-border/40 pb-4">
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors", contactCompleted ? "bg-green-600 text-white" : "bg-gold text-white")}>
+                    {contactCompleted ? <Check className="h-3 w-3" /> : "1"}
+                  </span>
+                  Account & Contact
+                </h2>
+                {contactCompleted && !user && (
+                   <Button variant="ghost" size="sm" onClick={() => setContactCompleted(false)} className="text-xs h-7">Edit</Button>
                 )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="firstName" className="text-sm font-medium leading-none">First Name *</label>
-                  <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleInputChange} required />
+              
+              {contactCompleted ? (
+                <div className="text-sm text-muted-foreground flex items-center gap-4">
+                   <div className="flex items-center gap-2">
+                     <UserIcon className="h-4 w-4" />
+                     <span className="font-medium text-foreground">{formData.email}</span>
+                   </div>
+                   <span>{formData.phone}</span>
                 </div>
-                <div className="space-y-1.5">
-                  <label htmlFor="lastName" className="text-sm font-medium leading-none">Last Name</label>
-                  <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleInputChange} />
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label htmlFor="email" className="text-sm font-medium leading-none">Email Address *</label>
-                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label htmlFor="phone" className="text-sm font-medium leading-none">Phone Number *</label>
-                  <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} required />
-                </div>
-              </div>
+              ) : (
+                <>
+                  {!user && (
+                    <div className="flex bg-muted/30 p-1 rounded-lg mb-6">
+                      <button onClick={() => setAuthMode("guest")} className={cn("flex-1 text-sm py-2 rounded-md font-medium transition-colors", authMode === "guest" ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground")}>Guest Checkout</button>
+                      <button onClick={() => setAuthMode("login")} className={cn("flex-1 text-sm py-2 rounded-md font-medium transition-colors", authMode === "login" ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground")}>Login</button>
+                      <button onClick={() => setAuthMode("register")} className={cn("flex-1 text-sm py-2 rounded-md font-medium transition-colors", authMode === "register" ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground")}>Create Account</button>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {authMode !== "login" && (
+                      <>
+                        <div className="space-y-1.5">
+                          <label htmlFor="firstName" className="text-sm font-medium leading-none">First Name *</label>
+                          <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleInputChange} required />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label htmlFor="lastName" className="text-sm font-medium leading-none">Last Name</label>
+                          <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleInputChange} />
+                        </div>
+                      </>
+                    )}
+                    <div className={cn("space-y-1.5", authMode === "login" ? "sm:col-span-2" : "sm:col-span-2")}>
+                      <label htmlFor="email" className="text-sm font-medium leading-none">Email Address *</label>
+                      <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
+                    </div>
+                    
+                    {authMode !== "login" && (
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <label htmlFor="phone" className="text-sm font-medium leading-none">Phone Number *</label>
+                        <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} required />
+                      </div>
+                    )}
+
+                    {authMode !== "guest" && (
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <label htmlFor="password" className="text-sm font-medium leading-none">Password *</label>
+                        <Input id="password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-4">
+                    <Button onClick={handleInlineAuth} disabled={authLoading} className="w-full sm:w-auto min-w-[200px]">
+                      {authLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                          <span>Processing...</span>
+                        </div>
+                      ) : (
+                        authMode === "guest" ? "Continue to Shipping" :
+                        authMode === "login" ? "Sign In & Continue" : "Create Account & Continue"
+                      )}
+                    </Button>
+                  </div>
+                </>
+              )}
             </section>
 
             {/* Shipping Address */}
-            <section>
-              <h2 className="text-lg font-semibold text-foreground mb-4">Shipping Address</h2>
+            <section className={cn("space-y-6 rounded-xl border p-6 transition-all", !contactCompleted ? "opacity-50 pointer-events-none border-border/50 bg-muted/10 grayscale-[50%]" : "border-border bg-white shadow-sm")}>
+              <div className="flex items-center gap-2 border-b border-border/40 pb-4 mb-4">
+                <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors", !contactCompleted ? "bg-muted text-muted-foreground" : "bg-gold text-white")}>2</span>
+                <h2 className="text-lg font-semibold text-foreground">Shipping Address</h2>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5 sm:col-span-2">
                   <label htmlFor="address" className="text-sm font-medium leading-none">Street Address *</label>
-                  <Input id="address" name="address" placeholder="House number and street name" value={formData.address} onChange={handleInputChange} required />
+                  <Input id="address" name="address" placeholder="House number and street name" value={formData.address} onChange={handleInputChange} required disabled={!contactCompleted} />
                 </div>
                 <div className="space-y-1.5">
                   <label htmlFor="city" className="text-sm font-medium leading-none">City *</label>
-                  <Input id="city" name="city" value={formData.city} onChange={handleInputChange} required />
+                  <Input id="city" name="city" value={formData.city} onChange={handleInputChange} required disabled={!contactCompleted} />
                 </div>
                 <div className="space-y-1.5">
                   <label htmlFor="country" className="text-sm font-medium leading-none">Country *</label>
@@ -355,6 +473,7 @@ export default function CheckoutPage() {
                     value={formData.country}
                     onChange={handleInputChange}
                     required
+                    disabled={!contactCompleted}
                     className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="" disabled>Select Country</option>
@@ -372,6 +491,7 @@ export default function CheckoutPage() {
                       value={formData.state}
                       onChange={handleInputChange}
                       required
+                      disabled={!contactCompleted}
                       className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <option value="" disabled>Select State</option>
@@ -389,14 +509,18 @@ export default function CheckoutPage() {
                     value={formData.pincode} 
                     onChange={handleInputChange} 
                     required 
+                    disabled={!contactCompleted}
                   />
                 </div>
               </div>
             </section>
 
             {/* Payment Method */}
-            <section>
-              <h2 className="text-lg font-semibold text-foreground mb-4">Payment Method</h2>
+            <section className={cn("space-y-6 rounded-xl border p-6 transition-all", !contactCompleted ? "opacity-50 pointer-events-none border-border/50 bg-muted/10 grayscale-[50%]" : "border-border bg-white shadow-sm")}>
+              <div className="flex items-center gap-2 border-b border-border/40 pb-4 mb-4">
+                <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors", !contactCompleted ? "bg-muted text-muted-foreground" : "bg-gold text-white")}>3</span>
+                <h2 className="text-lg font-semibold text-foreground">Payment Method</h2>
+              </div>
               <div className="bg-white rounded-lg border border-border p-4">
                 <div className="space-y-4">
                   {gateways.length === 0 ? (
@@ -411,9 +535,10 @@ export default function CheckoutPage() {
                           value={gateway.id}
                           checked={paymentMethod === gateway.id}
                           onChange={() => setPaymentMethod(gateway.id)}
+                          disabled={!contactCompleted}
                           className="h-4 w-4 text-gold border-border focus:ring-gold"
                         />
-                        <label htmlFor={gateway.id} className="text-sm font-medium leading-none cursor-pointer">
+                        <label htmlFor={gateway.id} className={cn("text-sm font-medium leading-none cursor-pointer", !contactCompleted && "opacity-60")}>
                           {gateway.title}
                           {gateway.description && (
                             <p className="text-xs text-muted-foreground mt-1 font-normal leading-relaxed max-w-[90%]">
@@ -492,7 +617,7 @@ export default function CheckoutPage() {
               <div className="mt-8">
                 <Button 
                   onClick={handlePayment} 
-                  disabled={loading} 
+                  disabled={loading || !contactCompleted} 
                   className="w-full h-12 text-base shadow-md"
                 >
                   {loading ? (
@@ -507,6 +632,11 @@ export default function CheckoutPage() {
                     </div>
                   )}
                 </Button>
+                {!contactCompleted && (
+                  <p className="text-xs text-center text-muted-foreground mt-3">
+                    Please complete the Contact & Account step to continue.
+                  </p>
+                )}
               </div>
 
             </div>

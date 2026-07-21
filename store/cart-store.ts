@@ -20,6 +20,7 @@ interface CartState {
   
   // Backend interactions
   fetchCart: () => Promise<void>;
+  syncWithBackend: (storeData: any) => void;
   addItem: (product: Product, quantity?: number, selectedVariationId?: number, selectedAttributes?: { name: string; option: string }[]) => Promise<void>;
   removeItem: (productId: number, selectedVariationId?: number, key?: string) => Promise<void>;
   updateQuantity: (productId: number, quantity: number, selectedVariationId?: number, key?: string) => Promise<void>;

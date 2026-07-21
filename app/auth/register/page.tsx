@@ -1,18 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Sparkles, ArrowRight } from "lucide-react";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
-  const { refreshSession } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/account";
+  const { refreshSession, user, isLoading } = useAuth();
   
+  React.useEffect(() => {
+    if (!isLoading && user) {
+      router.push(redirectPath);
+    }
+  }, [user, isLoading, router, redirectPath]);
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -59,7 +67,7 @@ export default function RegisterPage() {
         description: `Welcome to Ayodhya Store, ${data.user.firstName}!`,
       });
       
-      router.push("/account");
+      router.push(redirectPath);
     } catch (error: any) {
       toast.error("Registration Failed", {
         description: error.message,
@@ -85,7 +93,7 @@ export default function RegisterPage() {
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/auth/login" className="font-medium text-gold hover:text-gold-hover transition-colors">
+          <Link href={`/auth/login?redirect=${encodeURIComponent(redirectPath)}`} className="font-medium text-gold hover:text-gold-hover transition-colors">
             Sign in
           </Link>
         </p>
@@ -190,5 +198,19 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#FAF8F3]/50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="flex justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gold border-t-transparent mx-auto" />
+        </div>
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }
