@@ -42,7 +42,7 @@ export default async function ProductPage({
   const relatedIds = (product.upsell_ids && product.upsell_ids.length > 0) 
     ? product.upsell_ids 
     : (product.related_ids || []);
-  const isUpsell = product.upsell_ids && product.upsell_ids.length > 0;
+  const isUpsell = Boolean(product.upsell_ids && product.upsell_ids.length > 0);
   
   // Only block on variations (critical for add to cart)
   const variations = product.type === "variable" ? await getProductVariations(product.id) : [];
