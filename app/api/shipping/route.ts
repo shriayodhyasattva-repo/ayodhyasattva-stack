@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     const { state, postcode, country } = await request.json();
 
     // In a real implementation, you would match the address against WC shipping zones.
-    // For Ayodhya Store, we simplify to return a default free shipping or flat rate.
+    // For Ayodhya Sattva, we simplify to return a default free shipping or flat rate.
     // We'll fetch zones and methods as requested, but logic is simulated.
     
     const zones = await getShippingZones();

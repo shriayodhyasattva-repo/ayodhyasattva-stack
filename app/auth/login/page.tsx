@@ -77,12 +77,12 @@ function LoginForm() {
           <Link href="/" className="inline-flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-gold" />
             <span className="font-serif text-2xl font-bold tracking-tight text-foreground">
-              Ayodhya Store
+              Ayodhya Sattva
             </span>
           </Link>
         </div>
         <h2 className="mt-6 text-center text-3xl font-serif font-bold tracking-tight text-foreground">
-          Sign in to your account
+          Begin Your Spiritual Journey
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Or{" "}

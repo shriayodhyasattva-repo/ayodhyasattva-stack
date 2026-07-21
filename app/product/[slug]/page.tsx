@@ -22,7 +22,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${product.name} | Ayodhya Store`,
+    title: `${product.name} | Ayodhya Sattva`,
     description: product.short_description,
   };
 }

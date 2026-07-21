@@ -9,7 +9,7 @@ import StorePagination from "@/components/store-pagination";
 
 
 export const metadata = {
-  title: "Products | Ayodhya Store",
+  title: "Products | Ayodhya Sattva",
   description: "Browse our collection of sacred items, idols, and pooja essentials.",
 };
 
@@ -50,10 +50,10 @@ export default async function ProductsPage({
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              Sacred Collection
+              The Grandeur of Ayodhya
             </h1>
             <p className="mt-2 text-sm text-muted-foreground max-w-xl">
-              Authentic spiritual items handpicked for your devotion. Browse through our curated categories of premium products.
+              Authentic spiritual items handpicked for your devotion. Browse the sacred relics, temple idols, and pooja essentials of Ram Janmabhoomi.
             </p>
           </div>
           

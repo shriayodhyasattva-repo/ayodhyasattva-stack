@@ -15,7 +15,7 @@ const TESTIMONIALS: Testimonial[] = [
     author: "Aravind Sharma",
     location: "New Delhi, Delhi",
     rating: 5,
-    text: "The Maharaja Brass Ram Darbar idol is absolutely breathtaking. The quality of the brass and the fine detailing on Lord Rama's crown is museum-level. The delivery was fast, and it was packed with extreme care in a sacred box. Highly recommend for any home temple.",
+    text: "Jai Shri Ram! The Ram Darbar idol radiates the true majesty of Maryada Purushottam Rama. The fine detailing on the crown is museum-level. It arrived packed with extreme care, bringing immense peace to our home temple.",
     purchase: "Verified Buyer of Brass Ram Darbar"
   },
   {
@@ -23,7 +23,7 @@ const TESTIMONIALS: Testimonial[] = [
     author: "Meera Patel",
     location: "Mumbai, Maharashtra",
     rating: 5,
-    text: "The Mysore Sandalwood Dhoop sticks have completely transformed my morning prayers. The fragrance is rich, calming, and truly smells like a temple, without any of the chemical harshness or black smoke of normal incense. Will definitely subscribe for monthly deliveries.",
+    text: "The Mysore Sandalwood Dhoop sticks have transformed my morning prayers. The pure, rich fragrance truly feels like stepping into the sanctum of the Ram Janmabhoomi temple. No harsh smoke, just pure devotion.",
     purchase: "Verified Buyer of Mysore Sandalwood Dhoop"
   },
   {
@@ -31,7 +31,7 @@ const TESTIMONIALS: Testimonial[] = [
     author: "Rajesh Kothari",
     location: "Ahmedabad, Gujarat",
     rating: 5,
-    text: "I bought the teakwood replica of the Ayodhya Ram Mandir as a housewarming gift. The wood grain is gorgeous, and the precision of the carvings on the pillars is spectacular. It stands as a beautiful blessing in my brother's living room.",
+    text: "I gifted the teakwood replica of the Ayodhya Ram Mandir to my brother. The carvings are spectacular, echoing the grandeur of our heritage. It now stands as a beautiful blessing in his living room. Siya Ram!",
     purchase: "Verified Buyer of Teakwood Ram Mandir Replica"
   }
 ];
@@ -43,12 +43,12 @@ export default function TestimonialSection() {
         
         {/* Title */}
         <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-          <span className="text-xs font-semibold uppercase tracking-widest text-gold">Devotee Reviews</span>
+          <span className="text-xs font-semibold uppercase tracking-widest text-gold">Voices of the Bhaktas</span>
           <h2 className="font-serif text-3xl sm:text-4xl font-bold text-foreground mt-2">
-            Shared Spiritual Experiences
+            Blessings Shared by Fellow Devotees
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground mt-3">
-            Read what other devotees and art collectors have to say about our artisan products, secure packaging, and customer service.
+            The profound joy of bringing Lord Rama home is best expressed by the Bhaktas who have felt His divine presence.
           </p>
         </div>
 

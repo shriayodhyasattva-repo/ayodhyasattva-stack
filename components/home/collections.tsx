@@ -12,12 +12,12 @@ export default async function Collections() {
 
         {/* Title */}
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-14">
-          <span className="text-xs font-semibold uppercase tracking-widest text-gold">Sacred Catalog</span>
+          <span className="text-xs font-semibold uppercase tracking-widest text-gold">The Treasures of Ayodhya</span>
           <h2 className="font-serif text-2xl sm:text-4xl font-bold text-foreground mt-2">
-            Curated Devotional Collections
+            Adorn Your Altar with Devotion
           </h2>
           <p className="text-sm text-muted-foreground mt-2 sm:mt-3 leading-relaxed">
-            Every item is handpicked to enrich your daily spiritual practices.
+            From the sacred banks of the Sarayu river to your personal shrine, discover items that resonate with the eternal chant of 'Jai Shri Ram'.
           </p>
         </div>
 

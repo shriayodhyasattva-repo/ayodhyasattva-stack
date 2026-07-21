@@ -77,7 +77,7 @@ export default function Navbar({ categories }: { categories: {name: string, slug
             <Link href="/" className="flex items-center gap-2 group">
               <Sparkles className="h-6 w-6 text-gold group-hover:scale-110 transition-transform" />
               <span className="font-serif text-2xl font-bold tracking-tight text-foreground">
-                Ayodhya Store
+                Ayodhya Sattva
               </span>
             </Link>
           </div>

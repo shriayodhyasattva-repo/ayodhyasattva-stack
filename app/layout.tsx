@@ -15,7 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Ayodhya Store - Premium Spiritual & Heritage Store",
+  title: "Ayodhya Sattva - Premium Spiritual & Heritage Store",
   description: "Experience the divinity of Ayodhya with our premium collections of handcrafted temple idols, pooja essentials, spiritual items, and sacred decor.",
 };
 

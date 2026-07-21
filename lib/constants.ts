@@ -1,4 +1,4 @@
-export const STORE_NAME = "Ayodhya Store";
+export const STORE_NAME = "Ayodhya Sattva";
 export const STORE_DESCRIPTION = "Premium Spiritual & Heritage Store";
 
 export const NAVIGATION_LINKS = [

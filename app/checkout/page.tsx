@@ -294,7 +294,7 @@ export default function CheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
         amount: rzpData.amount,
         currency: rzpData.currency,
-        name: "Ayodhya Store",
+        name: "Ayodhya Sattva",
         description: `Order #${wcOrder.number}`,
         image: "/logo.png",
         order_id: rzpData.id,
@@ -360,7 +360,7 @@ export default function CheckoutPage() {
         </nav>
 
         <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground mb-8">
-          Checkout
+          Secure Your Sacred Offerings
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-12 gap-y-10">

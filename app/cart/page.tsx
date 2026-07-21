@@ -29,7 +29,7 @@ export default function CartPage() {
       <div className="bg-[#FAF8F3]/50 min-h-screen py-16 flex items-center justify-center">
         <div className="text-center space-y-2">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gold border-t-transparent mx-auto" />
-          <p className="text-xs text-muted-foreground">Preparing your sacred cart...</p>
+          <p className="text-xs text-muted-foreground">Preparing your sacred offerings...</p>
         </div>
       </div>
     );
@@ -40,15 +40,15 @@ export default function CartPage() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground mb-8">
-          Your Sacred Shopping Cart
+          Your Sacred Offerings
         </h1>
 
         {cart.length === 0 ? (
           <div className="bg-background rounded-2xl border border-border p-12 text-center max-w-lg mx-auto flex flex-col items-center justify-center space-y-4">
             <span className="text-5xl">🪔</span>
-            <h2 className="font-serif text-xl font-bold text-foreground">Your Cart is Empty</h2>
+            <h2 className="font-serif text-xl font-bold text-foreground">Your Basket of Offerings is Empty</h2>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Add products from our handpicked spiritual and heritage collections to begin.
+              Gather sacred items to invite the blessings of Lord Rama into your home.
             </p>
             <Link href="/products" className="pt-2">
               <Button className="gap-2">

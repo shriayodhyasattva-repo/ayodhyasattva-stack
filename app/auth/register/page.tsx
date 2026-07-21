@@ -64,7 +64,7 @@ function RegisterForm() {
       
       await refreshSession();
       toast.success("Account Created!", {
-        description: `Welcome to Ayodhya Store, ${data.user.firstName}!`,
+        description: `Welcome to Ayodhya Sattva, ${data.user.firstName}!`,
       });
       
       router.push(redirectPath);
@@ -84,12 +84,12 @@ function RegisterForm() {
           <Link href="/" className="inline-flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-gold" />
             <span className="font-serif text-2xl font-bold tracking-tight text-foreground">
-              Ayodhya Store
+              Ayodhya Sattva
             </span>
           </Link>
         </div>
         <h2 className="mt-6 text-center text-3xl font-serif font-bold tracking-tight text-foreground">
-          Create an account
+          Join the Ayodhya Sattva Family
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Already have an account?{" "}

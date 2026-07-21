@@ -1,4 +1,4 @@
-# Ayodhya Store
+# Ayodhya Sattva
 
 A premium ecommerce storefront built with Next.js 16, utilizing WooCommerce as a headless backend for products, orders, customers, and business logic.
 

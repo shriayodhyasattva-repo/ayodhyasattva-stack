@@ -29,13 +29,13 @@ export default async function Home() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
             <div>
               <span className="text-xs font-semibold uppercase tracking-widest text-gold inline-flex items-center gap-1">
-                <Sparkles className="h-3 w-3 fill-gold" /> Divine Highlights
+                <Sparkles className="h-3 w-3 fill-gold" /> Sanjeevani for the Soul
               </span>
               <h2 className="font-serif text-3xl font-bold text-foreground mt-2">
-                Featured Spiritual Masterpieces
+                Sacred Relics of Devotion
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-xl">
-                Handcrafted brass deities, sacred literature, and essential Pooja items selected for their exceptional artistry and authenticity.
+                Immaculate artistry crafted by generations of metalworkers, embodying the virtues of Lord Rama, Mother Sita, Lakshman, and Hanuman.
               </p>
             </div>
             <div>
