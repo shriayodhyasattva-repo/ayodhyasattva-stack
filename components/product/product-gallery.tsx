@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { ProductImage } from "@/types/product";
 import { cn } from "@/lib/utils";
 
@@ -35,10 +36,12 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
                   : "border-transparent opacity-60 hover:opacity-100"
               )}
             >
-              <img
+              <Image
                 src={image.src}
                 alt={image.alt || `Thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                sizes="80px"
+                className="object-cover"
               />
             </button>
           ))}
@@ -47,10 +50,13 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
 
       {/* Main Image */}
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/20 border border-border">
-        <img
+        <Image
           src={images[activeIndex].src}
           alt={images[activeIndex].alt || "Product image"}
-          className="w-full h-full object-cover"
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-cover"
         />
       </div>
     </div>

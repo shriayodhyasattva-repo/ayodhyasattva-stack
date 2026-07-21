@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Star } from "lucide-react";
 
@@ -28,10 +29,13 @@ export default function Hero() {
               </div>
             </div>
 
-            <img
+            <Image
               src="/ayodhya-ram-mandir-ramlala-hd-photo-png-transparent-image-allpngfree.png"
               alt="Divine Brass Idol Showcase"
-              className="relative z-10 h-full w-full object-cover object-top"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="relative z-10 object-cover object-top"
             />
             {/* Dark gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#FAF8F3] via-[#FAF8F3]/20 to-transparent z-20 pointer-events-none" />
@@ -136,10 +140,13 @@ export default function Hero() {
                 </div>
               </div>
 
-              <img
+              <Image
                 src="/ayodhya-ram-mandir-ramlala-hd-photo-png-transparent-image-allpngfree.png"
                 alt="Divine Brass Idol Showcase"
-                className="relative z-10 h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="relative z-10 object-cover object-top transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 z-20 pointer-events-none">
                 <div className="text-white">
