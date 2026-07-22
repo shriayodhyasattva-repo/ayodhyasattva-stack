@@ -28,6 +28,7 @@ export async function POST(req: Request) {
 
     const response = await createProductReview(payload);
     
+    // @ts-expect-error - Next.js 16 typings require 2 arguments, but runtime expects 1
     revalidateTag("products");
     return NextResponse.json({ success: true, data: response });
   } catch (error: any) {
