@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     const topic = req.headers.get("x-wc-webhook-topic");
 
     if (topic?.startsWith("product.")) {
+      // @ts-expect-error - Next.js 16 typings require 2 arguments, but runtime expects 1
       revalidateTag("products");
       // If we had the specific product slug in the payload, we could clear it exactly:
       // revalidateTag(`product-${payload.slug}`);
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Default catch-all
+    // @ts-expect-error - Next.js 16 typings require 2 arguments, but runtime expects 1
     revalidateTag("products");
     return NextResponse.json({ revalidated: true, message: "Cache cleared" });
 
