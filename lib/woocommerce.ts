@@ -94,7 +94,7 @@ async function fetchWCCached(endpoint: string, queryParams: Record<string, any> 
       'Content-Type': 'application/json'
     },
     next: { tags, revalidate: 60 },
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(25000),
   });
 
   if (!res.ok) {
