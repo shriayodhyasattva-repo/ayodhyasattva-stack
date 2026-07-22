@@ -7,8 +7,8 @@ export async function GET(req: Request) {
     const country = searchParams.get("country");
     const fetchCountries = searchParams.get("countries") === "true";
     
-    let countries = [];
-    let states = [];
+    let countries: any[] = [];
+    let states: any[] = [];
     
     if (fetchCountries) {
       countries = await getCountries();
