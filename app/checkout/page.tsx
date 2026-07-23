@@ -95,6 +95,8 @@ export default function CheckoutPage() {
             if (address) {
               setFormData(prev => ({
                 ...prev,
+                firstName: prev.firstName || address.first_name || "",
+                lastName: prev.lastName || address.last_name || "",
                 phone: address.phone || prev.phone,
                 address: address.address_1 || prev.address,
                 city: address.city || prev.city,
@@ -462,6 +464,14 @@ export default function CheckoutPage() {
                 <h2 className="text-lg font-semibold text-foreground">Shipping Address</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="firstName" className="text-sm font-medium leading-none">First Name *</label>
+                  <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleInputChange} required disabled={!contactCompleted} />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="lastName" className="text-sm font-medium leading-none">Last Name</label>
+                  <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleInputChange} disabled={!contactCompleted} />
+                </div>
                 <div className="space-y-1.5 sm:col-span-2">
                   <label htmlFor="address" className="text-sm font-medium leading-none">Street Address *</label>
                   <Input id="address" name="address" placeholder="House number and street name" value={formData.address} onChange={handleInputChange} required disabled={!contactCompleted} />
