@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { storeApi } from "@/lib/woocommerce";
+import { storeApi, updateCustomer } from "@/lib/woocommerce";
 import { getStoreApiHeaders, saveStoreHeaders } from "../cart/route";
 import { getSession } from "@/lib/auth";
 
@@ -44,6 +44,18 @@ export async function POST(req: Request) {
     // The cart will be cleared on WC side. Update tokens just in case.
     if (response.headers["cart-token"]) {
         await saveStoreHeaders(response.headers["cart-token"], response.headers["nonce"]);
+    }
+    
+    // Auto-save the address to the user's profile for future reuse!
+    if (session) {
+      try {
+        await updateCustomer(session.id, {
+          billing: body.billing,
+          shipping: body.shipping
+        });
+      } catch (e) {
+        console.error("Failed to sync address to profile:", e);
+      }
     }
     
     return NextResponse.json({ order: response.data });
