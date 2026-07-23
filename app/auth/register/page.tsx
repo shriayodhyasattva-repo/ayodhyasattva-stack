@@ -26,6 +26,7 @@ function RegisterForm() {
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     password: "",
   });
 
@@ -37,7 +38,7 @@ function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName || !formData.phone) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -151,6 +152,24 @@ function RegisterForm() {
                   autoComplete="email"
                   required
                   value={formData.email}
+                  onChange={handleChange}
+                  className="focus-visible:border-gold"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-foreground">
+                Phone Number
+              </label>
+              <div className="mt-1">
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  value={formData.phone}
                   onChange={handleChange}
                   className="focus-visible:border-gold"
                 />

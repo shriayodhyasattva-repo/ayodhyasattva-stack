@@ -6,9 +6,9 @@ import { SessionUser } from "@/types/product";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, firstName, lastName } = body;
+    const { email, password, firstName, lastName, phone } = body;
 
-    if (!email || !password || !firstName || !lastName) {
+    if (!email || !password || !firstName || !lastName || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -21,6 +21,12 @@ export async function POST(req: Request) {
         first_name: firstName,
         last_name: lastName,
         username: email.split("@")[0], // Basic username generation
+        billing: {
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          phone: phone,
+        }
       });
     } catch (err: any) {
       console.error("createCustomer failed:", err.response?.data || err.message);
@@ -50,6 +56,7 @@ export async function POST(req: Request) {
       firstName: wcCustomer.first_name,
       lastName: wcCustomer.last_name,
       displayName: authData.user_display_name,
+      jwtToken: authData.token,
     };
 
     await createSession(user);

@@ -77,7 +77,6 @@ export default function CheckoutPage() {
   // Pre-fill user data and address if logged in
   useEffect(() => {
     if (user) {
-      setContactCompleted(true);
       setFormData(prev => ({
         ...prev,
         firstName: user.firstName || prev.firstName,
@@ -103,6 +102,10 @@ export default function CheckoutPage() {
                 state: address.state || prev.state,
                 pincode: address.postcode || prev.pincode,
               }));
+              
+              if (address.phone) {
+                setContactCompleted(true);
+              }
             }
           }
         })
@@ -184,6 +187,7 @@ export default function CheckoutPage() {
         if (!res.ok) throw new Error(data.error || "Login failed");
         
         await refreshSession();
+        await fetchCart();
         toast.success("Logged in successfully!");
       } else if (authMode === "register") {
         if (!formData.email || !password || !formData.firstName || !formData.lastName) {
@@ -204,6 +208,7 @@ export default function CheckoutPage() {
         if (!res.ok) throw new Error(data.error || "Registration failed");
         
         await refreshSession();
+        await fetchCart();
         toast.success("Account created successfully!");
       }
       setContactCompleted(true);
@@ -415,7 +420,7 @@ export default function CheckoutPage() {
                     )}
                     <div className={cn("space-y-1.5", authMode === "login" ? "sm:col-span-2" : "sm:col-span-2")}>
                       <label htmlFor="email" className="text-sm font-medium leading-none">Email Address *</label>
-                      <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
+                      <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required disabled={!!user} />
                     </div>
                     
                     {authMode !== "login" && (
