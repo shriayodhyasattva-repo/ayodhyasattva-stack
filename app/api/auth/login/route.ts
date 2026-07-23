@@ -34,13 +34,13 @@ export async function POST(req: Request) {
 
     await createSession(user);
 
-    // Clear stale nonce from the previous anonymous/guest session.
-    // We KEEP the cart_token so WooCommerce can merge the guest cart with the user's cart.
-    // The next cart request will use the JWT token and old cart-token to establish a fresh
-    // WooCommerce session and receive a new valid nonce + cart-token.
-    const { cookies } = await import("next/headers");
-    const cookieStore = await cookies();
-    cookieStore.delete("nonce");
+    // Bootstrap the WooCommerce Store API session for the logged-in user immediately.
+    try {
+      const { bootstrapStoreApiSession } = await import("@/app/api/cart/route");
+      await bootstrapStoreApiSession(data.token);
+    } catch (e) {
+      console.error("Failed to bootstrap Store API session during login", e);
+    }
 
     return NextResponse.json({ user });
   } catch (error: any) {

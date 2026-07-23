@@ -61,10 +61,15 @@ export async function POST(req: Request) {
 
     await createSession(user);
 
-    // Clear stale nonce from the guest session so the cart can refresh and merge
-    const { cookies } = await import("next/headers");
-    const cookieStore = await cookies();
-    cookieStore.delete("nonce");
+    // Bootstrap the WooCommerce Store API session for the new user immediately.
+    // This ensures that WooCommerce links the guest cart to this new user and 
+    // provides a user-bound nonce before they hit the checkout endpoint.
+    try {
+      const { bootstrapStoreApiSession } = await import("@/app/api/cart/route");
+      await bootstrapStoreApiSession(authData.token);
+    } catch (e) {
+      console.error("Failed to bootstrap Store API session during registration", e);
+    }
 
     return NextResponse.json({ user });
   } catch (error: any) {

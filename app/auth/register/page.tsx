@@ -28,6 +28,7 @@ function RegisterForm() {
     email: "",
     phone: "",
     password: "",
+    confirmPassword: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,8 +39,13 @@ function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName || !formData.phone) {
+    if (!formData.email || !formData.password || !formData.confirmPassword || !formData.firstName || !formData.lastName || !formData.phone) {
       toast.error("Please fill in all fields");
+      return;
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
       return;
     }
     
@@ -188,6 +194,24 @@ function RegisterForm() {
                   autoComplete="new-password"
                   required
                   value={formData.password}
+                  onChange={handleChange}
+                  className="focus-visible:border-gold"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
+                Confirm Password
+              </label>
+              <div className="mt-1">
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
                   onChange={handleChange}
                   className="focus-visible:border-gold"
                 />

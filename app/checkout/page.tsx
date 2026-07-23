@@ -24,10 +24,11 @@ export default function CheckoutPage() {
   const { cart: items, cartTotal, clearCart, isMounted, isInitialized, fetchCart } = useCart();
   const { user, refreshSession } = useAuth();
   
-  const [authMode, setAuthMode] = useState<"guest" | "login" | "register">("guest");
+  const [authMode, setAuthMode] = useState<"login" | "register">("register");
   const [authLoading, setAuthLoading] = useState(false);
   const [contactCompleted, setContactCompleted] = useState(false);
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [gateways, setGateways] = useState<any[]>([]);
@@ -164,15 +165,6 @@ export default function CheckoutPage() {
   };
 
   const handleInlineAuth = async () => {
-    if (authMode === "guest") {
-      if (!formData.firstName || !formData.email || !formData.phone) {
-        toast.error("Please provide name, email, and phone to continue.");
-        return;
-      }
-      setContactCompleted(true);
-      return;
-    }
-
     setAuthLoading(true);
     try {
       if (authMode === "login") {
@@ -192,8 +184,12 @@ export default function CheckoutPage() {
         await fetchCart();
         toast.success("Logged in successfully!");
       } else if (authMode === "register") {
-        if (!formData.email || !password || !formData.firstName || !formData.lastName) {
+        if (!formData.email || !password || !confirmPassword || !formData.firstName || !formData.lastName || !formData.phone) {
           toast.error("Please fill in all fields");
+          return;
+        }
+        if (password !== confirmPassword) {
+          toast.error("Passwords do not match");
           return;
         }
         const res = await fetch("/api/auth/register", {
@@ -203,7 +199,8 @@ export default function CheckoutPage() {
             email: formData.email,
             password,
             firstName: formData.firstName,
-            lastName: formData.lastName
+            lastName: formData.lastName,
+            phone: formData.phone
           }),
         });
         const data = await res.json();
@@ -401,7 +398,6 @@ export default function CheckoutPage() {
                 <>
                   {!user && (
                     <div className="flex bg-muted/30 p-1 rounded-lg mb-6">
-                      <button onClick={() => setAuthMode("guest")} className={cn("flex-1 text-sm py-2 rounded-md font-medium transition-colors", authMode === "guest" ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground")}>Guest Checkout</button>
                       <button onClick={() => setAuthMode("login")} className={cn("flex-1 text-sm py-2 rounded-md font-medium transition-colors", authMode === "login" ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground")}>Login</button>
                       <button onClick={() => setAuthMode("register")} className={cn("flex-1 text-sm py-2 rounded-md font-medium transition-colors", authMode === "register" ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground")}>Create Account</button>
                     </div>
@@ -432,10 +428,14 @@ export default function CheckoutPage() {
                       </div>
                     )}
 
-                    {authMode !== "guest" && (
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label htmlFor="password" className="text-sm font-medium leading-none">Password *</label>
-                        <Input id="password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <div className={cn("space-y-1.5", authMode === "login" ? "sm:col-span-2" : "sm:col-span-1")}>
+                      <label htmlFor="password" className="text-sm font-medium leading-none">Password *</label>
+                      <Input id="password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    </div>
+                    {authMode === "register" && (
+                      <div className="space-y-1.5 sm:col-span-1">
+                        <label htmlFor="confirmPassword" className="text-sm font-medium leading-none">Confirm Password *</label>
+                        <Input id="confirmPassword" name="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
                       </div>
                     )}
                   </div>
@@ -448,7 +448,6 @@ export default function CheckoutPage() {
                           <span>Processing...</span>
                         </div>
                       ) : (
-                        authMode === "guest" ? "Continue to Shipping" :
                         authMode === "login" ? "Sign In & Continue" : "Create Account & Continue"
                       )}
                     </Button>
