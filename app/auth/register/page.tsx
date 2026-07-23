@@ -113,7 +113,7 @@ function RegisterForm() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-foreground">
-                  First Name
+                  First Name *
                 </label>
                 <div className="mt-1">
                   <Input
@@ -130,7 +130,7 @@ function RegisterForm() {
 
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-foreground">
-                  Last Name
+                  Last Name *
                 </label>
                 <div className="mt-1">
                   <Input
@@ -148,7 +148,7 @@ function RegisterForm() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                Email address
+                Email address *
               </label>
               <div className="mt-1">
                 <Input
@@ -166,7 +166,7 @@ function RegisterForm() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-foreground">
-                Phone Number
+                Phone Number *
               </label>
               <div className="mt-1">
                 <Input
@@ -184,7 +184,7 @@ function RegisterForm() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                Password
+                Password *
               </label>
               <div className="mt-1">
                 <Input
@@ -202,7 +202,7 @@ function RegisterForm() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
-                Confirm Password
+                Confirm Password *
               </label>
               <div className="mt-1">
                 <Input

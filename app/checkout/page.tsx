@@ -428,11 +428,13 @@ export default function CheckoutPage() {
                       </div>
                     )}
 
-                    <div className={cn("space-y-1.5", authMode === "login" ? "sm:col-span-2" : "sm:col-span-1")}>
-                      <label htmlFor="password" className="text-sm font-medium leading-none">Password *</label>
-                      <Input id="password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    </div>
-                    {authMode === "register" && (
+                    {!user && (
+                      <div className={cn("space-y-1.5", authMode === "login" ? "sm:col-span-2" : "sm:col-span-1")}>
+                        <label htmlFor="password" className="text-sm font-medium leading-none">Password *</label>
+                        <Input id="password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                      </div>
+                    )}
+                    {!user && authMode === "register" && (
                       <div className="space-y-1.5 sm:col-span-1">
                         <label htmlFor="confirmPassword" className="text-sm font-medium leading-none">Confirm Password *</label>
                         <Input id="confirmPassword" name="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
@@ -441,16 +443,31 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="pt-4">
-                    <Button onClick={handleInlineAuth} disabled={authLoading} className="w-full sm:w-auto min-w-[200px]">
-                      {authLoading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                          <span>Processing...</span>
-                        </div>
-                      ) : (
-                        authMode === "login" ? "Sign In & Continue" : "Create Account & Continue"
-                      )}
-                    </Button>
+                    {!user ? (
+                      <Button onClick={handleInlineAuth} disabled={authLoading} className="w-full sm:w-auto min-w-[200px]">
+                        {authLoading ? (
+                          <div className="flex items-center gap-2">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                            <span>Processing...</span>
+                          </div>
+                        ) : (
+                          authMode === "login" ? "Sign In & Continue" : "Create Account & Continue"
+                        )}
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={() => {
+                          if (!formData.firstName || !formData.email || !formData.phone) {
+                            toast.error("Please provide name, email, and phone to continue.");
+                            return;
+                          }
+                          setContactCompleted(true);
+                        }} 
+                        className="w-full sm:w-auto min-w-[200px]"
+                      >
+                        Continue to Shipping
+                      </Button>
+                    )}
                   </div>
                 </>
               )}
