@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCustomer, updateCustomer } from "@/lib/woocommerce";
-import { getSession } from "@/lib/auth";
+import { getSession, createSession } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
@@ -41,8 +41,15 @@ export async function PUT(request: Request) {
 
     const customer = await updateCustomer(session.id, updateData);
     
-    // We should technically update the session JWT here if first/last name changed, 
-    // but for simplicity we rely on the DB source of truth for full profile fetches.
+    // Update the session cookie so the UI instantly reflects the new name without requiring a re-login
+    if (updateData.first_name !== undefined || updateData.last_name !== undefined) {
+      const updatedSession = {
+        ...session,
+        firstName: updateData.first_name !== undefined ? updateData.first_name : session.firstName,
+        lastName: updateData.last_name !== undefined ? updateData.last_name : session.lastName,
+      };
+      await createSession(updatedSession);
+    }
     
     return NextResponse.json({ customer });
   } catch (error: any) {
