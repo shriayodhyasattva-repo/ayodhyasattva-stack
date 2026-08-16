@@ -88,14 +88,20 @@ async function fetchWCCached(endpoint: string, queryParams: Record<string, any> 
   
   const authHeader = oauth.toHeader(oauth.authorize(requestData));
 
-  const res = await fetch(url.toString(), {
-    headers: {
-      ...authHeader,
-      'Content-Type': 'application/json'
-    },
-    next: { tags, revalidate: 60 },
-    signal: AbortSignal.timeout(25000),
-  });
+  let res;
+  try {
+    res = await fetch(url.toString(), {
+      headers: {
+        ...authHeader,
+        'Content-Type': 'application/json'
+      },
+      next: { tags, revalidate: 60 },
+      signal: AbortSignal.timeout(25000),
+    });
+  } catch (error: any) {
+    console.error(`Fetch failed for URL: ${url.toString()}`, error);
+    throw new Error(`Failed to fetch WooCommerce API: ${error?.message || 'Unknown error'}`);
+  }
 
   if (!res.ok) {
     throw new Error(`WooCommerce API Error: ${res.status} ${res.statusText}`);
