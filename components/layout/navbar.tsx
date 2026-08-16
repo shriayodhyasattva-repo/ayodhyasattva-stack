@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Search, ShoppingBag, Menu, X, Sparkles, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
@@ -75,7 +76,15 @@ export default function Navbar({ categories }: { categories: {name: string, slug
           {/* Logo */}
           <div className="flex justify-center md:justify-start flex-1 md:flex-none">
             <Link href="/" className="flex items-center gap-2 group">
-              <Sparkles className="h-6 w-6 text-gold group-hover:scale-110 transition-transform" />
+              <div className="relative h-8 w-8 overflow-hidden group-hover:scale-110 transition-transform">
+                <Image 
+                  src="/logo.png" 
+                  alt="Ayodhya Sattva Logo" 
+                  fill 
+                  className="object-contain" 
+                  priority 
+                />
+              </div>
               <span className="font-serif text-2xl font-bold tracking-tight text-foreground">
                 Ayodhya Sattva
               </span>

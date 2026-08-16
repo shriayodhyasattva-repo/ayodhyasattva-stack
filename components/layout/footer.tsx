@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Phone, MapPin, Clock, ArrowRight, ShieldCheck, RefreshCw, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,8 +65,18 @@ export default function Footer() {
           {/* Brand Info & Newsletter */}
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <Link href="/" className="font-serif text-2xl font-bold tracking-wide text-gold">
-                🛕 {STORE_NAME}
+              <Link href="/" className="flex items-center gap-2 group">
+                <div className="relative h-8 w-8 overflow-hidden group-hover:scale-110 transition-transform">
+                  <Image 
+                    src="/logo.png" 
+                    alt={`${STORE_NAME} Logo`} 
+                    fill 
+                    className="object-contain" 
+                  />
+                </div>
+                <span className="font-serif text-2xl font-bold tracking-wide text-gold">
+                  {STORE_NAME}
+                </span>
               </Link>
               <p className="mt-2 text-sm text-muted-foreground max-w-sm">
                 {STORE_DESCRIPTION}. Connecting devotees worldwide to the heritage, spirituality, and artistic brilliance of Ayodhya.

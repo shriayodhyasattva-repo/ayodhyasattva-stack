@@ -15,11 +15,11 @@ export default function Hero() {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
 
-        {/* ── Mobile layout: full-bleed image hero with overlay text ─────── */}
-        <div className="block lg:hidden">
-          <div className="relative w-full aspect-[4/3] overflow-hidden bg-amber-50">
+        {/* ── Mobile layout: Image card matching desktop effect ─────── */}
+        <div className="block lg:hidden pt-24 px-2">
+          <div className="relative mx-auto w-full max-w-[380px] aspect-[4/5] rounded-2xl overflow-hidden border border-border shadow-xl bg-amber-50 group">
             {/* Animated Helix Glow Background */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-80 mix-blend-multiply pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-center opacity-80 mix-blend-multiply pointer-events-none group-hover:opacity-100 transition-opacity duration-700">
               <div className="absolute w-[150%] h-[150%] animate-spin" style={{ animationDuration: '20s' }}>
                 <div className="absolute top-[10%] left-[20%] w-[60%] h-[60%] bg-gold/40 rounded-[40%_60%_70%_30%] blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
                 <div className="absolute bottom-[10%] right-[20%] w-[60%] h-[60%] bg-orange-400/30 rounded-[60%_40%_30%_70%] blur-3xl animate-pulse" style={{ animationDuration: '5s' }} />
@@ -35,10 +35,16 @@ export default function Hero() {
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="relative z-10 object-cover object-top"
+              className="relative z-10 object-cover object-top transition-transform duration-700 group-hover:scale-105"
             />
-            {/* Dark gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#FAF8F3] via-[#FAF8F3]/20 to-transparent z-20 pointer-events-none" />
+            
+            {/* Dark gradient overlay matching desktop */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-5 z-20 pointer-events-none">
+              <div className="text-white">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-soft-gold">Suryavanshi Heritage</span>
+                <h3 className="font-serif text-lg font-semibold mt-1">Brass Ram Darbar Devotion</h3>
+              </div>
+            </div>
           </div>
 
           {/* Text below the image on mobile */}
