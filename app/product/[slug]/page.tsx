@@ -21,9 +21,26 @@ export async function generateMetadata({
     };
   }
 
+  const images = product.images?.[0]?.src ? [product.images[0].src] : [];
+
   return {
-    title: `${product.name} | Ayodhya Sattva`,
-    description: product.short_description,
+    title: product.name,
+    description: product.short_description || `Buy ${product.name} at Ayodhya Sattva.`,
+    alternates: {
+      canonical: `/product/${product.slug}`,
+    },
+    openGraph: {
+      title: product.name,
+      description: product.short_description || `Buy ${product.name} at Ayodhya Sattva.`,
+      url: `/product/${product.slug}`,
+      images: images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.short_description || `Buy ${product.name} at Ayodhya Sattva.`,
+      images: images,
+    },
   };
 }
 
@@ -47,8 +64,45 @@ export default async function ProductPage({
   // Only block on variations (critical for add to cart)
   const variations = product.type === "variable" ? await getProductVariations(product.id) : [];
 
+  // Generate JSON-LD Schema
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images?.map(img => img.src) || [],
+    description: product.short_description?.replace(/<[^>]*>?/gm, '') || `Buy ${product.name} at Ayodhya Sattva.`,
+    sku: product.sku || product.id.toString(),
+    mpn: product.sku || product.id.toString(),
+    brand: {
+      '@type': 'Brand',
+      name: 'Ayodhya Sattva',
+    },
+    offers: {
+      '@type': 'AggregateOffer',
+      url: `https://ayodhyasattva.com/product/${product.slug}`,
+      priceCurrency: 'INR',
+      lowPrice: product.price || '0',
+      highPrice: product.regular_price || product.price || '0',
+      offerCount: 1,
+      availability: product.stock_status === 'instock' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Ayodhya Sattva'
+      }
+    },
+    aggregateRating: product.rating_count > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: product.average_rating,
+      reviewCount: product.rating_count
+    } : undefined
+  };
+
   return (
     <div className="bg-[#FAF8F3] min-h-screen pt-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Product Details Section */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">

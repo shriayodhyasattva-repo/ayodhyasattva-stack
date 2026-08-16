@@ -8,10 +8,36 @@ import SortSelect from "./sort-select";
 import StorePagination from "@/components/store-pagination";
 
 
-export const metadata = {
-  title: "Products | Ayodhya Sattva",
-  description: "Browse our collection of sacred items, idols, and pooja essentials.",
-};
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams;
+  const currentCategory = (resolvedSearchParams.category as string) || "all";
+  
+  if (currentCategory !== "all") {
+    // Capitalize and format category name for basic SEO without extra fetch
+    const categoryName = currentCategory.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    return {
+      title: `${categoryName} Collection`,
+      description: `Explore our premium collection of ${categoryName} at Ayodhya Sattva. Handcrafted with devotion.`,
+      alternates: {
+        canonical: `/products?category=${currentCategory}`,
+      }
+    };
+  }
+  
+  return {
+    title: "All Products",
+    description: "Browse our complete collection of sacred items, handcrafted idols, and premium pooja essentials.",
+    alternates: {
+      canonical: '/products',
+    }
+  };
+}
 
 export default async function ProductsPage({
   searchParams,
