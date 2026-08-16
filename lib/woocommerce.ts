@@ -96,7 +96,7 @@ async function fetchWCCached(endpoint: string, queryParams: Record<string, any> 
         'Content-Type': 'application/json'
       },
       next: { tags, revalidate: 60 },
-      signal: AbortSignal.timeout(25000),
+      signal: AbortSignal.timeout(60000), // Increased to 60s for Vercel build
     });
   } catch (error: any) {
     console.error(`Fetch failed for URL: ${url.toString()}`, error);
