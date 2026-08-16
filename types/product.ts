@@ -74,6 +74,8 @@ export interface Product {
   weight?: string;
   dimensions?: { length: string; width: string; height: string };
   tags?: { id: number; name: string; slug: string }[];
+  date_created?: string;
+  date_modified?: string;
 }
 
 export interface CartItem {
