@@ -1,4 +1,4 @@
-import { storeApi } from "./lib/woocommerce";
+import { storeApi } from "../lib/woocommerce";
 
 async function testCart() {
   try {

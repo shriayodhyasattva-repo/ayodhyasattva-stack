@@ -62,14 +62,10 @@ export default function Navbar({ categories }: { categories: {name: string, slug
             <button
               type="button"
               className="text-foreground hover:text-gold transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setMobileMenuOpen(true)}
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="h-6 w-6" aria-hidden="true" />
-              )}
+              <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
 
@@ -132,41 +128,80 @@ export default function Navbar({ categories }: { categories: {name: string, slug
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-border mt-3 absolute w-full shadow-lg">
-          <div className="space-y-1 px-4 pb-3 pt-2">
+        <div 
+          className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm md:hidden transition-opacity"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      
+      {/* Mobile Menu Panel */}
+      <div 
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-sm bg-background border-r border-border z-[70] transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
+          mobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between px-4 py-5 border-b border-border/40">
+          <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+            <div className="relative h-7 w-7 overflow-hidden">
+              <Image src="/logo.png" alt="Ayodhya Sattva Logo" fill className="object-contain" />
+            </div>
+            <span className="font-serif text-xl font-bold tracking-tight text-foreground">
+              Ayodhya Sattva
+            </span>
+          </Link>
+          <button 
+            onClick={() => setMobileMenuOpen(false)} 
+            className="text-muted-foreground hover:text-gold transition-colors rounded-full p-1 bg-muted"
+          >
+            <span className="sr-only">Close menu</span>
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto py-6 px-4">
+          <div className="space-y-1">
+            <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4 px-2">Navigation</div>
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`block rounded-md px-3 py-2 text-base font-medium ${
+                className={`block rounded-xl px-4 py-3.5 text-lg font-serif transition-all ${
                   checkIsActive(link.href)
-                    ? "bg-soft-gold text-gold"
-                    : "text-foreground hover:bg-muted/10"
+                    ? "bg-gold/10 text-gold font-bold"
+                    : "text-foreground hover:bg-muted"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
               </Link>
             ))}
-            <div className="border-t border-border mt-4 pt-4 pb-2 px-3 flex items-center justify-between">
+          </div>
+          
+          <div className="mt-8 pt-8 border-t border-border/40">
+            <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4 px-2">Account & Settings</div>
+            <div className="space-y-2">
               <Link 
                 href={isLoggedIn ? "/account" : "/auth/login"} 
-                className="flex items-center gap-2 text-base font-medium text-foreground hover:text-gold"
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium text-foreground hover:text-gold rounded-xl hover:bg-muted transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <User className="h-5 w-5" />
-                {isLoggedIn ? "My Account" : "Log In"}
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-soft-gold/30 text-gold">
+                  <User className="h-4 w-4" />
+                </div>
+                {isLoggedIn ? "My Account" : "Sign In / Register"}
               </Link>
-              <button className="flex items-center gap-2 text-base font-medium text-foreground hover:text-gold">
-                <Search className="h-5 w-5" />
-                Search
+              <button className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-foreground hover:text-gold rounded-xl hover:bg-muted transition-colors text-left">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-soft-gold/30 text-gold">
+                  <Search className="h-4 w-4" />
+                </div>
+                Search Store
               </button>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

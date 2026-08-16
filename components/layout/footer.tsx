@@ -21,10 +21,10 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#FAF8F3] border-t border-border mt-auto">
+    <footer className="bg-background border-t border-border mt-auto">
       
       {/* Reassurance Badges */}
-      <div className="border-b border-border bg-[#F5EFE4]/30 py-8">
+      <div className="border-b border-border bg-muted/50 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 text-center sm:text-left">
             <div className="flex flex-col sm:flex-row items-center gap-3">

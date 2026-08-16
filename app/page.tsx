@@ -13,7 +13,7 @@ export default async function Home() {
   const { data: featuredProducts } = await getProducts({ featured: true });
 
   return (
-    <div className="bg-[#FAF8F3]/40 min-h-screen">
+    <div className="bg-background min-h-screen">
       
       {/* Hero Header Banner */}
       <Hero />
@@ -22,7 +22,7 @@ export default async function Home() {
       <Collections />
 
       {/* Featured Products Highlighting */}
-      <section className="bg-background py-16 sm:py-24 border-b border-border/40">
+      <section className="bg-background py-20 sm:py-24 border-b border-border/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
           {/* Section Header */}

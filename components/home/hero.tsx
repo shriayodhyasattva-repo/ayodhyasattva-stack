@@ -5,7 +5,7 @@ import { ArrowRight, ShieldCheck, Star } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-[#FAF8F3] border-b border-border/40">
+    <section className="relative overflow-hidden bg-background border-b border-border/40">
 
       {/* Soft background glows */}
       <div className="absolute inset-0 opacity-50 pointer-events-none">

@@ -64,13 +64,13 @@ export default function ProductCard({ product, className, priority = false }: Pr
         <button
           onClick={handleWishlist}
           className={cn(
-            "absolute right-2.5 top-2.5 z-20 flex h-9 w-9 items-center justify-center rounded-full border bg-background/90 shadow-sm backdrop-blur-xs transition-colors",
+            "absolute right-2.5 top-2.5 z-20 flex h-10 w-10 items-center justify-center rounded-full border bg-background/90 shadow-sm backdrop-blur-xs transition-colors",
             isWishlisted
               ? "border-gold/40 bg-soft-gold/20 text-gold"
               : "border-border text-muted-foreground hover:text-gold"
           )}
         >
-          <Heart className={cn("h-4 w-4", isWishlisted ? "fill-gold text-gold" : "")} />
+          <Heart className={cn("h-4.5 w-4.5", isWishlisted ? "fill-gold text-gold" : "")} />
           <span className="sr-only">Toggle wishlist</span>
         </button>
 
@@ -125,7 +125,7 @@ export default function ProductCard({ product, className, priority = false }: Pr
         </div>
 
         {/* Title */}
-        <h3 className="mt-1 font-serif text-xs sm:text-sm font-bold text-foreground line-clamp-2 group-hover:text-gold transition-colors leading-snug">
+        <h3 className="mt-1 font-serif text-sm sm:text-base font-bold text-foreground line-clamp-2 group-hover:text-gold transition-colors leading-snug">
           <Link href={`/product/${product.slug}`}>{product.name}</Link>
         </h3>
 

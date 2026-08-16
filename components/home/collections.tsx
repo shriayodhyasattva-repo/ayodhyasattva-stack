@@ -7,11 +7,11 @@ export default async function Collections() {
   const categories = await getCategories();
 
   return (
-    <section className="bg-background py-12 sm:py-20 border-b border-border/40">
+    <section className="bg-background py-16 sm:py-20 border-b border-border/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         {/* Title */}
-        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-14">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
           <span className="text-xs font-semibold uppercase tracking-widest text-gold">The Treasures of Ayodhya</span>
           <h2 className="font-serif text-2xl sm:text-4xl font-bold text-foreground mt-2">
             Adorn Your Altar with Devotion
@@ -28,7 +28,7 @@ export default async function Collections() {
               key={category.slug}
               href={`/products?category=${category.slug}`}
               /* Shorter aspect ratio on mobile for better thumb-scroll UX */
-              className="group relative flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-border bg-[#FAF8F3] aspect-[3/4] active:scale-[0.98] transition-all duration-200"
+              className="group relative flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-border bg-muted aspect-[3/4] active:scale-[0.98] transition-all duration-200"
             >
               {/* Overlay */}
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 z-10 transition-colors duration-300" />

@@ -38,7 +38,7 @@ const TESTIMONIALS: Testimonial[] = [
 
 export default function TestimonialSection() {
   return (
-    <section className="bg-[#FAF8F3] py-16 sm:py-24">
+    <section className="bg-background py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Title */}
